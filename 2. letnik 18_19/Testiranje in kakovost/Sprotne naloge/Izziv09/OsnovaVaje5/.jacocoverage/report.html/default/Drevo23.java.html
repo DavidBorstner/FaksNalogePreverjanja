@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Drevo23.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;OsnovaVaje5&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">Drevo23.java</span></div><h1>Drevo23.java</h1><pre class="source lang-java linenums">import java.util.*;
+
+<span class="fc" id="L3">public class Drevo23&lt;Tip extends Comparable&gt; implements Seznam&lt;Tip&gt; {</span>
+
+    class Element23 {
+
+        public Tip a, b, c;
+        public Element23 L, S, D, E;
+
+<span class="fc" id="L10">        public Element23(Tip e) {</span>
+<span class="fc" id="L11">            this.a = e;</span>
+<span class="fc" id="L12">            this.b = null;</span>
+<span class="fc" id="L13">            this.L = null;</span>
+<span class="fc" id="L14">            this.S = null;</span>
+<span class="fc" id="L15">            this.D = null;</span>
+<span class="fc" id="L16">            this.E = null;</span>
+<span class="fc" id="L17">        }</span>
+
+<span class="fc" id="L19">        public Element23() {</span>
+<span class="fc" id="L20">            a = null;</span>
+<span class="fc" id="L21">            b = null;</span>
+<span class="fc" id="L22">            c = null;</span>
+<span class="fc" id="L23">            L = null;</span>
+<span class="fc" id="L24">            S = null;</span>
+<span class="fc" id="L25">            D = null;</span>
+<span class="fc" id="L26">            E = null;</span>
+<span class="fc" id="L27">        }</span>
+
+<span class="fc" id="L29">        public Element23(Tip e, Tip x) {</span>
+<span class="fc" id="L30">            this.a = e;</span>
+<span class="fc" id="L31">            this.b = x;</span>
+<span class="fc" id="L32">            this.L = null;</span>
+<span class="fc" id="L33">            this.S = null;</span>
+<span class="fc" id="L34">            this.D = null;</span>
+<span class="fc" id="L35">            this.E = null;</span>
+<span class="fc" id="L36">        }</span>
+
+    }
+
+    Element23 rootNode;
+<span class="fc" id="L41">    int n = 0;</span>
+<span class="fc" id="L42">    boolean pog = false;</span>
+<span class="fc" id="L43">    boolean vstavi = false;</span>
+    Element23 zac;
+
+    public void D23() {
+<span class="fc" id="L47">        rootNode = new Element23();</span>
+<span class="fc" id="L48">        n = 0;</span>
+<span class="fc" id="L49">        vrni = new ArrayList&lt;Tip&gt;();</span>
+<span class="fc" id="L50">    }</span>
+
+    public boolean primerjava(Tip ena, Tip dva) {
+<span class="fc" id="L53">        int prvi = Integer.parseInt((String) ena);</span>
+<span class="fc" id="L54">        int drugi = Integer.parseInt((String) dva);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (prvi &gt; drugi) {</span>
+<span class="fc" id="L56">            return true;</span>
+        } else {
+<span class="fc" id="L58">            return false;</span>
+        }
+    }
+
+    public Element23 insert(Tip e, Element23 node) {
+<span class="fc bfc" id="L63" title="All 4 branches covered.">        if (node == null || node.a == null) { // pogleda če sploh je not kej</span>
+<span class="fc" id="L64">            node = new Element23(e);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        } else if (node.L == null) { // če obstaja L pomen da so otroci</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (node.b == null) { // če bja ni pomen da ga lahk kr tk not damo</span>
+<span class="fc" id="L67">                node.b = e;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                if (primerjava(node.a, node.b)) {</span>
+<span class="fc" id="L69">                    Tip zac = node.b;</span>
+<span class="fc" id="L70">                    node.b = node.a;</span>
+<span class="fc" id="L71">                    node.a = zac;</span>
+<span class="fc" id="L72">                }</span>
+            } else { // če je b pomen da sta a in b polna kar pomen, da je treba razdelit na otroke
+<span class="fc bfc" id="L74" title="All 2 branches covered.">                if (primerjava(node.a, e)) { // pogleda če je prvi element večji od eja</span>
+<span class="fc" id="L75">                    node.L = insert(e, node.L);</span>
+<span class="fc" id="L76">                    node.S = insert(node.b, node.S);</span>
+<span class="fc" id="L77">                    node.b = null;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                } else if (primerjava(e, node.b)) { // pogleda če je e večjo od drugega elementa</span>
+<span class="fc" id="L79">                    node.L = insert(node.a, node.L);</span>
+<span class="fc" id="L80">                    node.S = insert(e, node.S);</span>
+<span class="fc" id="L81">                    node.a = node.b;</span>
+<span class="fc" id="L82">                    node.b = null;</span>
+                } else { // če je e vmes med obema elemntoma
+<span class="fc" id="L84">                    node.L = insert(node.a, node.L);</span>
+<span class="fc" id="L85">                    node.S = insert(node.b, node.S);</span>
+<span class="fc" id="L86">                    node.b = null;</span>
+<span class="fc" id="L87">                    node.a = e;</span>
+                }
+            }
+<span class="pc bpc" id="L90" title="2 of 6 branches missed.">        } else if (node.a != null &amp;&amp; node.L != null &amp;&amp; velikost(node) != 2) { // če a ni null in L obstaja pomen,da mamo otroke</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            if (primerjava(node.a, e)) { // če je prvi element roota manjši od eja</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                if (node.L.b == null) { // če je b null lahko kr tak vstavmo</span>
+<span class="fc" id="L93">                    node.L.b = e;</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">                    if (primerjava(node.L.a, node.L.b)) {</span>
+<span class="fc" id="L95">                        node.L.b = node.L.a;</span>
+<span class="fc" id="L96">                        node.L.a = e;</span>
+                    } else {
+<span class="fc" id="L98">                        node.L.b = e;</span>
+                    }
+                } else { // če b ni null pol ne mormo kr tk not dat
+<span class="fc bfc" id="L101" title="All 2 branches covered.">                    if (velikost(node.S) != 2) {</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">                        if (primerjava(node.L.a, e)) {</span>
+<span class="fc" id="L103">                            node.L.c = node.L.b;</span>
+<span class="fc" id="L104">                            node.L.b = node.L.a;</span>
+<span class="fc" id="L105">                            node.L.a = e;</span>
+
+<span class="fc" id="L107">                            node.S.b = node.a;</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">                            if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L109">                                node.S.b = node.S.a;</span>
+<span class="fc" id="L110">                                node.S.a = node.a;</span>
+                            }
+
+<span class="fc" id="L113">                            node.a = node.L.c;</span>
+<span class="fc" id="L114">                            node.L.c = null;</span>
+
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                        } else if (primerjava(e, node.L.b)) {</span>
+<span class="fc" id="L117">                            node.S.b = node.a;</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                            if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L119">                                node.S.b = node.S.a;</span>
+<span class="fc" id="L120">                                node.S.a = node.a;</span>
+                            }
+
+<span class="fc" id="L123">                            node.a = e;</span>
+
+                        } else {
+<span class="fc" id="L126">                            node.L.c = node.L.b;</span>
+<span class="fc" id="L127">                            node.L.b = e;</span>
+
+<span class="fc" id="L129">                            node.S.b = node.a;</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                            if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L131">                                node.S.b = node.S.a;</span>
+<span class="fc" id="L132">                                node.S.a = node.a;</span>
+                            }
+
+<span class="fc" id="L135">                            node.a = node.L.c;</span>
+<span class="fc" id="L136">                            node.L.c = null;</span>
+                        }
+                    } else {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">                        if (primerjava(node.L.a, e)) {</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">                            if (node.D == null) {</span>
+<span class="fc" id="L141">                                node.D = new Element23();</span>
+                            }
+
+<span class="fc" id="L144">                            node.D.a = node.S.a;</span>
+<span class="fc" id="L145">                            node.D.b = node.S.b;</span>
+
+<span class="fc" id="L147">                            node.S.a = node.L.b;</span>
+<span class="fc" id="L148">                            node.S.b = null;</span>
+
+<span class="fc" id="L150">                            node.b = node.a;</span>
+<span class="fc" id="L151">                            node.a = node.L.a;</span>
+<span class="fc" id="L152">                            node.L.a = e;</span>
+<span class="fc" id="L153">                            node.L.b = null;</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                        } else if (primerjava(e, node.L.b)) {</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                            if (node.D == null) {</span>
+<span class="fc" id="L156">                                node.D = new Element23();</span>
+                            }
+<span class="fc" id="L158">                            node.D.a = node.S.a;</span>
+<span class="fc" id="L159">                            node.D.b = node.S.b;</span>
+
+<span class="fc" id="L161">                            node.S.a = e;</span>
+<span class="fc" id="L162">                            node.S.b = null;</span>
+
+<span class="fc" id="L164">                            node.b = node.a;</span>
+<span class="fc" id="L165">                            node.a = node.L.b;</span>
+<span class="fc" id="L166">                            node.L.b = null;</span>
+                        } else {
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">                            if (node.D == null) {</span>
+<span class="fc" id="L169">                                node.D = new Element23();</span>
+                            }
+<span class="fc" id="L171">                            node.D.a = node.S.a;</span>
+<span class="fc" id="L172">                            node.D.b = node.S.b;</span>
+
+<span class="fc" id="L174">                            node.S.a = node.L.b;</span>
+<span class="fc" id="L175">                            node.S.b = null;</span>
+
+<span class="fc" id="L177">                            node.b = node.a;</span>
+<span class="fc" id="L178">                            node.a = e;</span>
+<span class="fc" id="L179">                            node.L.b = null;</span>
+                        }
+                    }
+                }
+            } else {
+<span class="fc bfc" id="L184" title="All 2 branches covered.">                if (node.S.b == null) {</span>
+<span class="fc" id="L185">                    node.S.b = e;</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                    if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L187">                        node.S.b = node.S.a;</span>
+<span class="fc" id="L188">                        node.S.a = e;</span>
+                    } else {
+<span class="fc" id="L190">                        node.S.b = e;</span>
+                    }
+                } else { // če b ni null je treba mal premešat :(
+<span class="fc bfc" id="L193" title="All 2 branches covered.">                    if (velikost(node.L) != 2) {</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">                        if (primerjava(node.S.a, e)) {</span>
+<span class="fc" id="L195">                            node.L.b = node.a;</span>
+<span class="fc" id="L196">                            node.a = e;</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                        } else if (primerjava(e, node.S.b)) {</span>
+<span class="fc" id="L198">                            node.L.b = node.a;</span>
+<span class="fc" id="L199">                            node.a = node.S.a;</span>
+
+<span class="fc" id="L201">                            node.S.a = node.S.b;</span>
+<span class="fc" id="L202">                            node.S.b = e;</span>
+                        } else {
+<span class="fc" id="L204">                            node.L.b = node.a;</span>
+<span class="fc" id="L205">                            node.a = node.S.a;</span>
+<span class="fc" id="L206">                            node.S.a = e;</span>
+
+                        }
+                    } else {
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                        if (primerjava(node.S.a, e)) {</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                            if (node.D == null) {</span>
+<span class="fc" id="L212">                                node.D = new Element23();</span>
+                            }
+<span class="fc" id="L214">                            node.D.a = node.S.b;</span>
+
+<span class="fc" id="L216">                            node.b = node.S.a;</span>
+
+<span class="fc" id="L218">                            node.S.a = e;</span>
+<span class="fc" id="L219">                            node.S.b = null;</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">                        } else if (primerjava(e, node.S.b)) {</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">                            if (node.D == null) {</span>
+<span class="fc" id="L222">                                node.D = new Element23();</span>
+                            }
+<span class="fc" id="L224">                            node.D.a = e;</span>
+
+<span class="fc" id="L226">                            node.b = node.S.b;</span>
+
+<span class="fc" id="L228">                            node.S.b = null;</span>
+                        } else {
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">                            if (node.D == null) {</span>
+<span class="fc" id="L231">                                node.D = new Element23();</span>
+                            }
+<span class="fc" id="L233">                            node.D.a = node.S.b;</span>
+
+<span class="fc" id="L235">                            node.b = e;</span>
+<span class="fc" id="L236">                            node.S.b = null;</span>
+                        }
+                    }
+
+                }
+            }
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        } else if (velikost(node) == 2) {</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            if (primerjava(node.a, e)) {</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">                if (velikost(node.L) != 2) {</span>
+<span class="fc" id="L245">                    node.L.b = e;</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">                    if (primerjava(node.L.a, node.L.b)) {</span>
+<span class="fc" id="L247">                        node.L.b = node.L.a;</span>
+<span class="fc" id="L248">                        node.L.a = e;</span>
+                    }
+<span class="fc bfc" id="L250" title="All 2 branches covered.">                } else if (velikost(node.S) != 2) {</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">                    if (primerjava(node.L.a, e)) {</span>
+<span class="fc" id="L252">                        node.L.c = node.L.b;</span>
+<span class="fc" id="L253">                        node.L.b = node.L.a;</span>
+<span class="fc" id="L254">                        node.L.a = e;</span>
+
+<span class="fc" id="L256">                        node.S.b = node.a;</span>
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">                        if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L258">                            node.S.b = node.S.a;</span>
+<span class="fc" id="L259">                            node.S.a = node.a;</span>
+                        }
+
+<span class="fc" id="L262">                        node.a = node.L.c;</span>
+<span class="fc" id="L263">                        node.L.c = null;</span>
+
+<span class="fc bfc" id="L265" title="All 2 branches covered.">                    } else if (primerjava(e, node.L.b)) {</span>
+<span class="fc" id="L266">                        node.S.b = node.a;</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">                        if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L268">                            node.S.b = node.S.a;</span>
+<span class="fc" id="L269">                            node.S.a = node.a;</span>
+                        }
+
+<span class="fc" id="L272">                        node.a = e;</span>
+
+                    } else {
+<span class="fc" id="L275">                        node.L.c = node.L.b;</span>
+<span class="fc" id="L276">                        node.L.b = e;</span>
+
+<span class="fc" id="L278">                        node.S.b = node.a;</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">                        if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L280">                            node.S.b = node.S.a;</span>
+<span class="fc" id="L281">                            node.S.a = node.a;</span>
+                        }
+
+<span class="fc" id="L284">                        node.a = node.L.c;</span>
+<span class="fc" id="L285">                        node.L.c = null;</span>
+                    }
+                } else {
+                    
+
+<span class="fc" id="L290">                    Tip najmanjsa = null;</span>
+
+<span class="fc bfc" id="L292" title="All 2 branches covered.">                    if (primerjava(node.L.a, e)) {</span>
+<span class="fc" id="L293">                        najmanjsa = node.L.a;</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">                    } else if (primerjava(e, node.L.b)) {</span>
+<span class="fc" id="L295">                        najmanjsa = node.L.b;</span>
+                    } else {
+<span class="fc" id="L297">                        najmanjsa = e;</span>
+                    }
+
+<span class="fc" id="L300">                    Tip A = najmanjsa;</span>
+<span class="fc" id="L301">                    Tip B = node.a;</span>
+<span class="fc" id="L302">                    Tip C = node.b;</span>
+
+<span class="fc" id="L304">                    Element23 l = null;</span>
+<span class="fc" id="L305">                    Element23 s = null;</span>
+<span class="fc" id="L306">                    Element23 d = new Element23(node.S.a, node.S.b);</span>
+<span class="fc" id="L307">                    Element23 x = new Element23(node.D.a, node.D.b);</span>
+
+<span class="fc bfc" id="L309" title="All 2 branches covered.">                    if (primerjava(node.L.a, e)) {</span>
+<span class="fc" id="L310">                        l = new Element23(e);</span>
+<span class="fc" id="L311">                        s = new Element23(node.L.b);</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">                    } else if (primerjava(e, node.L.b)) {</span>
+<span class="fc" id="L313">                        l = new Element23(node.L.a);</span>
+<span class="fc" id="L314">                        s = new Element23(e);</span>
+                    } else {
+<span class="fc" id="L316">                        l = new Element23(node.L.a);</span>
+<span class="fc" id="L317">                        s = new Element23(node.L.b);</span>
+                    }
+
+<span class="fc" id="L320">                    node.L.L = l;</span>
+<span class="fc" id="L321">                    node.L.S = s;</span>
+<span class="fc" id="L322">                    node.L.a = A;</span>
+<span class="fc" id="L323">                    node.L.b = null;</span>
+
+<span class="fc" id="L325">                    node.S.L = d;</span>
+<span class="fc" id="L326">                    node.S.S = x;</span>
+<span class="fc" id="L327">                    node.S.a = C;</span>
+<span class="fc" id="L328">                    node.S.b = null;</span>
+
+<span class="fc" id="L330">                    node.D = null;</span>
+<span class="fc" id="L331">                    node.a = B;</span>
+<span class="fc" id="L332">                    node.b = null;</span>
+<span class="fc" id="L333">                    pog = true;</span>
+<span class="fc" id="L334">                }</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">            } else if (primerjava(e, node.b)) {</span>
+<span class="fc bfc" id="L336" title="All 2 branches covered.">                if (velikost(node.D) != 2) {</span>
+<span class="fc" id="L337">                    node.D.b = e;</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">                    if (primerjava(node.D.a, node.D.b)) {</span>
+<span class="fc" id="L339">                        node.D.b = node.D.a;</span>
+<span class="fc" id="L340">                        node.D.a = e;</span>
+                    }
+<span class="fc bfc" id="L342" title="All 2 branches covered.">                } else if (velikost(node.S) != 2) {</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">                    if (primerjava(node.D.a, e)) {</span>
+<span class="fc" id="L344">                        node.S.b = node.b;</span>
+<span class="fc" id="L345">                        node.b = e;</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">                    } else if (primerjava(e, node.D.b)) {</span>
+<span class="fc" id="L347">                        node.S.b = node.b;</span>
+<span class="fc" id="L348">                        node.b = node.D.a;</span>
+<span class="fc" id="L349">                        node.D.a = node.D.b;</span>
+<span class="fc" id="L350">                        node.D.b = e;</span>
+                    } else {
+<span class="fc" id="L352">                        node.S.b = node.b;</span>
+<span class="fc" id="L353">                        node.b = node.D.a;</span>
+<span class="fc" id="L354">                        node.D.a = e;</span>
+                    }
+                } else { // else še k so 3 v rootu
+<span class="fc bfc" id="L357" title="All 2 branches covered.">                    if (pog == true) {</span>
+<span class="fc" id="L358">                        vstavi = true;</span>
+                    }
+<span class="fc" id="L360">                    Tip najmanjsa = null;</span>
+
+<span class="fc bfc" id="L362" title="All 2 branches covered.">                    if (primerjava(node.D.a, e)) {</span>
+<span class="fc" id="L363">                        najmanjsa = node.D.a;</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">                    } else if (primerjava(e, node.D.b)) {</span>
+<span class="fc" id="L365">                        najmanjsa = node.D.b;</span>
+                    } else {
+<span class="fc" id="L367">                        najmanjsa = e;</span>
+                    }
+
+<span class="fc" id="L370">                    Tip A = node.a;</span>
+<span class="fc" id="L371">                    Tip B = node.b;</span>
+<span class="fc" id="L372">                    Tip C = najmanjsa;</span>
+
+<span class="fc" id="L374">                    Element23 l = new Element23(node.L.a, node.L.b);;</span>
+<span class="fc" id="L375">                    Element23 s = new Element23(node.S.a, node.S.b);</span>
+<span class="fc" id="L376">                    Element23 d = null;</span>
+<span class="fc" id="L377">                    Element23 x = null;</span>
+
+<span class="fc bfc" id="L379" title="All 2 branches covered.">                    if (primerjava(node.D.a, e)) {</span>
+<span class="fc" id="L380">                        d = new Element23(e);</span>
+<span class="fc" id="L381">                        x = new Element23(node.D.b);</span>
+<span class="fc bfc" id="L382" title="All 2 branches covered.">                    } else if (primerjava(e, node.D.b)) {</span>
+<span class="fc" id="L383">                        d = new Element23(node.D.a);</span>
+<span class="fc" id="L384">                        x = new Element23(e);</span>
+                    } else {
+<span class="fc" id="L386">                        d = new Element23(node.D.a);</span>
+<span class="fc" id="L387">                        x = new Element23(node.D.b);</span>
+                    }
+
+<span class="fc" id="L390">                    node.L.L = l;</span>
+<span class="fc" id="L391">                    node.L.S = s;</span>
+<span class="fc" id="L392">                    node.L.a = A;</span>
+<span class="fc" id="L393">                    node.L.b = null;</span>
+
+<span class="fc" id="L395">                    node.S.L = d;</span>
+<span class="fc" id="L396">                    node.S.S = x;</span>
+<span class="fc" id="L397">                    node.S.a = C;</span>
+<span class="fc" id="L398">                    node.S.b = null;</span>
+
+<span class="fc" id="L400">                    node.D = null;</span>
+<span class="fc" id="L401">                    node.a = B;</span>
+<span class="fc" id="L402">                    node.b = null;</span>
+<span class="fc" id="L403">                    pog = true;</span>
+<span class="fc" id="L404">                }</span>
+            } else {
+
+<span class="fc bfc" id="L407" title="All 2 branches covered.">                if (velikost(node.S) != 2) {</span>
+<span class="fc" id="L408">                    node.S.b = e;</span>
+<span class="fc bfc" id="L409" title="All 2 branches covered.">                    if (primerjava(node.S.a, node.S.b)) {</span>
+<span class="fc" id="L410">                        node.S.b = node.S.a;</span>
+<span class="fc" id="L411">                        node.S.a = e;</span>
+                    }
+<span class="fc bfc" id="L413" title="All 2 branches covered.">                } else if (velikost(node.D) != 2) {</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">                    if (primerjava(node.S.a, e)) {</span>
+<span class="fc" id="L415">                        node.D.b = node.D.a;</span>
+<span class="fc" id="L416">                        node.D.a = node.b;</span>
+
+<span class="fc" id="L418">                        node.b = node.S.b;</span>
+<span class="fc" id="L419">                        node.S.b = node.S.a;</span>
+<span class="fc" id="L420">                        node.S.a = e;</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">                    } else if (primerjava(e, node.S.b)) {</span>
+<span class="fc" id="L422">                        node.D.b = node.D.a;</span>
+<span class="fc" id="L423">                        node.D.a = node.b;</span>
+
+<span class="fc" id="L425">                        node.b = e;</span>
+                    } else {
+<span class="fc" id="L427">                        node.D.b = node.D.a;</span>
+<span class="fc" id="L428">                        node.D.a = node.b;</span>
+
+<span class="fc" id="L430">                        node.b = node.S.b;</span>
+<span class="fc" id="L431">                        node.S.b = e;</span>
+                    }
+<span class="fc bfc" id="L433" title="All 2 branches covered.">                } else if (velikost(node.L) != 2) {</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">                    if (primerjava(node.S.a, e)) {</span>
+                        
+<span class="fc" id="L436">                        node.D.a = node.S.b;</span>
+
+<span class="fc" id="L438">                        node.b = node.S.a;</span>
+
+<span class="fc" id="L440">                        node.S.a = e;</span>
+<span class="fc" id="L441">                        node.S.b = null;</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">                    } else if (primerjava(e, node.S.b)) {</span>
+                        
+<span class="fc" id="L444">                        node.D.a = e;</span>
+
+<span class="fc" id="L446">                        node.b = node.S.b;</span>
+
+<span class="fc" id="L448">                        node.S.b = null;</span>
+                    } else {
+                        
+
+<span class="fc" id="L452">                        node.L.b = node.S.a;</span>
+
+<span class="fc" id="L454">                        node.a = e;</span>
+<span class="fc" id="L455">                        node.S.a = node.S.b;</span>
+<span class="fc" id="L456">                        node.S.b = null;</span>
+                    }
+                } else {
+                    
+<span class="fc" id="L460">                    Tip najmanjsa = null;</span>
+
+<span class="fc bfc" id="L462" title="All 2 branches covered.">                    if (primerjava(node.S.a, e)) {</span>
+<span class="fc" id="L463">                        najmanjsa = node.S.a;</span>
+<span class="fc bfc" id="L464" title="All 2 branches covered.">                    } else if (primerjava(e, node.S.b)) {</span>
+<span class="fc" id="L465">                        najmanjsa = node.S.b;</span>
+                    } else {
+<span class="fc" id="L467">                        najmanjsa = e;</span>
+                    }
+
+<span class="fc" id="L470">                    Tip A = node.a;</span>
+<span class="fc" id="L471">                    Tip B = najmanjsa;</span>
+<span class="fc" id="L472">                    Tip C = node.b;</span>
+
+<span class="fc" id="L474">                    Element23 l = new Element23(node.L.a, node.L.b);</span>
+<span class="fc" id="L475">                    Element23 s = null;</span>
+<span class="fc" id="L476">                    Element23 d = null;</span>
+<span class="fc" id="L477">                    Element23 x = new Element23(node.D.a, node.D.b);</span>
+
+<span class="fc bfc" id="L479" title="All 2 branches covered.">                    if (primerjava(node.S.a, e)) {</span>
+<span class="fc" id="L480">                        s = new Element23(e);</span>
+<span class="fc" id="L481">                        d = new Element23(node.S.b);</span>
+<span class="fc bfc" id="L482" title="All 2 branches covered.">                    } else if (primerjava(e, node.S.b)) {</span>
+<span class="fc" id="L483">                        s = new Element23(node.S.a);</span>
+<span class="fc" id="L484">                        d = new Element23(e);</span>
+                    } else {
+<span class="fc" id="L486">                        s = new Element23(node.S.a);</span>
+<span class="fc" id="L487">                        d = new Element23(node.S.b);</span>
+                    }
+
+<span class="fc" id="L490">                    node.L.L = l;</span>
+<span class="fc" id="L491">                    node.L.S = s;</span>
+<span class="fc" id="L492">                    node.L.a = A;</span>
+<span class="fc" id="L493">                    node.L.b = null;</span>
+
+<span class="fc" id="L495">                    node.S.L = d;</span>
+<span class="fc" id="L496">                    node.S.S = x;</span>
+<span class="fc" id="L497">                    node.S.a = C;</span>
+<span class="fc" id="L498">                    node.S.b = null;</span>
+
+<span class="fc" id="L500">                    node.D = null;</span>
+<span class="fc" id="L501">                    node.a = B;</span>
+<span class="fc" id="L502">                    node.b = null;</span>
+<span class="fc" id="L503">                    pog = true;</span>
+                }
+            }
+        }
+<span class="fc" id="L507">        return (node);</span>
+    }
+
+    public int velikost(Element23 poglej) {
+<span class="fc" id="L511">        int st = 0;</span>
+<span class="pc bpc" id="L512" title="1 of 2 branches missed.">        if (poglej.a != null) {</span>
+<span class="fc" id="L513">            st++;</span>
+        }
+<span class="fc bfc" id="L515" title="All 2 branches covered.">        if (poglej.b != null) {</span>
+<span class="fc" id="L516">            st++;</span>
+        }
+<span class="fc" id="L518">        return st;</span>
+    }
+
+    public Element23 posebenInsert(Tip e, Element23 node) {
+<span class="fc bfc" id="L522" title="All 2 branches covered.">        if (globina(node) != 2) {</span>
+<span class="fc bfc" id="L523" title="All 2 branches covered.">            if (primerjava(node.a, e)) {</span>
+<span class="fc" id="L524">                posebenInsert(e, node.L);</span>
+<span class="pc bpc" id="L525" title="1 of 4 branches missed.">            } else if (node.b != null &amp;&amp; primerjava(e, node.b)) {</span>
+<span class="fc" id="L526">                posebenInsert(e, node.D);</span>
+            } else {
+<span class="fc" id="L528">                posebenInsert(e, node.S);</span>
+            }
+        } else {
+<span class="fc" id="L531">            node = insert(e, node);</span>
+<span class="fc" id="L532">            zac = node;</span>
+        }
+<span class="fc" id="L534">        return (node);</span>
+    }
+
+    @Override
+    public void add(Tip e) {
+<span class="fc bfc" id="L539" title="All 2 branches covered.">        if (obstaja(e, rootNode)) {</span>
+<span class="fc" id="L540">            throw new UnsupportedOperationException();</span>
+        }
+<span class="fc bfc" id="L542" title="All 2 branches covered.">        if (pog == true) {</span>
+<span class="fc" id="L543">            rootNode = posebenInsert(e, rootNode);</span>
+<span class="fc bfc" id="L544" title="All 2 branches covered.">            if (vstavi == true) {</span>
+<span class="pc bpc" id="L545" title="1 of 2 branches missed.">                if (primerjava(zac.a, rootNode.a)) {</span>
+<span class="fc" id="L546">                    rootNode.b = zac.a;</span>
+<span class="fc" id="L547">                    rootNode.S = zac.L;</span>
+<span class="fc" id="L548">                    rootNode.D = zac.S;</span>
+                }
+<span class="fc" id="L550">                zac = null;</span>
+<span class="fc" id="L551">                vstavi = false;</span>
+            }
+        } else {
+<span class="fc" id="L554">            rootNode = insert(e, rootNode);</span>
+        }
+
+<span class="fc" id="L557">        n++;</span>
+<span class="fc" id="L558">    }</span>
+
+    @Override
+    public Tip removeFirst() {
+<span class="fc bfc" id="L562" title="All 2 branches covered.">        if(rootNode == null){</span>
+<span class="fc" id="L563">            return null;</span>
+        }else{
+<span class="fc" id="L565">            Tip zac = rootNode.a;</span>
+<span class="fc" id="L566">            odstrani(zac, rootNode);</span>
+<span class="fc" id="L567">            return(zac);</span>
+        }
+    }
+
+    @Override
+    public Tip getFirst() {
+<span class="fc" id="L573">        return rootNode.a;</span>
+    }
+
+    @Override
+    public int size() {
+<span class="fc" id="L578">        return this.n;</span>
+    }
+
+    @Override
+    public int depth() {
+<span class="fc bfc" id="L583" title="All 2 branches covered.">        if (rootNode == null) {</span>
+<span class="fc" id="L584">            return 0;</span>
+        } else {
+<span class="fc" id="L586">            return dp(rootNode);</span>
+        }
+    }
+
+    public int dp(Element23 node) {
+<span class="fc bfc" id="L591" title="All 2 branches covered.">        if (node.L == null) {</span>
+<span class="fc" id="L592">            return 1;</span>
+        } else {
+<span class="fc" id="L594">            return 1 + dp(node.L);</span>
+        }
+    }
+
+    public int globina(Element23 node) {
+<span class="fc bfc" id="L599" title="All 2 branches covered.">        if (node == null) {</span>
+<span class="fc" id="L600">            return 0;</span>
+        } else {
+<span class="fc" id="L602">            return 1 + globina(node.L);</span>
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+<span class="fc bfc" id="L608" title="All 2 branches covered.">        if (rootNode == null) {</span>
+<span class="fc" id="L609">            return true;</span>
+        } else {
+<span class="fc" id="L611">            return false;</span>
+        }
+    }
+
+    public Tip odstrani(Tip e, Element23 node) {
+<span class="fc bfc" id="L616" title="All 2 branches covered.">        if (globina(node) == 1) { // če mamo max 2 not</span>
+<span class="fc bfc" id="L617" title="All 2 branches covered.">            if (node.a.equals(e)) {</span>
+<span class="fc bfc" id="L618" title="All 2 branches covered.">                if (node.b != null) {</span>
+<span class="fc" id="L619">                    node.a = node.b;</span>
+<span class="fc" id="L620">                    node.b = null;</span>
+
+<span class="fc" id="L622">                    n--;</span>
+<span class="fc" id="L623">                    return (e);</span>
+                }else{
+<span class="fc" id="L625">                    node.a = null;</span>
+<span class="fc" id="L626">                    n--;</span>
+<span class="fc" id="L627">                    return(e);</span>
+                }
+            } else {
+<span class="fc" id="L630">                node.b = null;</span>
+<span class="fc" id="L631">                n--;</span>
+<span class="fc" id="L632">                return (e);</span>
+            }
+<span class="fc bfc" id="L634" title="All 4 branches covered.">        } else if (globina(node) == 2 &amp;&amp; node.b != null) { // če mamo že otroke</span>
+<span class="fc bfc" id="L635" title="All 2 branches covered.">            if (node.L.a.equals(e)) {</span>
+<span class="fc bfc" id="L636" title="All 2 branches covered.">                if (node.L.b != null) {</span>
+<span class="fc" id="L637">                    node.L.a = node.L.b;</span>
+<span class="fc" id="L638">                    node.L.b = null;</span>
+<span class="fc" id="L639">                    n--;</span>
+<span class="fc" id="L640">                    return (e);</span>
+                } else {
+<span class="fc bfc" id="L642" title="All 2 branches covered.">                    if (node.S.b == null) {</span>
+<span class="fc" id="L643">                        Tip zac = node.a;</span>
+<span class="fc" id="L644">                        node.L = node.S;</span>
+<span class="fc" id="L645">                        node.S = node.D;</span>
+<span class="fc" id="L646">                        node.D = null;</span>
+<span class="fc" id="L647">                        node.L.b = node.L.a;</span>
+<span class="fc" id="L648">                        node.L.a = zac;</span>
+
+<span class="fc" id="L650">                        node.a = node.b;</span>
+<span class="fc" id="L651">                        node.b = null;</span>
+<span class="fc" id="L652">                        n--;</span>
+<span class="fc" id="L653">                        return (e);</span>
+                    } else {
+<span class="fc" id="L655">                        node.L.a = node.a;</span>
+<span class="fc" id="L656">                        node.a = node.S.a;</span>
+<span class="fc" id="L657">                        node.S.a = node.S.b;</span>
+<span class="fc" id="L658">                        node.S.b = null;</span>
+<span class="fc" id="L659">                        n--;</span>
+<span class="fc" id="L660">                        return (e);</span>
+                    }
+
+                }
+<span class="fc bfc" id="L664" title="All 4 branches covered.">            } else if (node.L.b != null &amp;&amp; node.L.b.equals(e)) {</span>
+<span class="fc" id="L665">                node.L.b = null;</span>
+<span class="fc" id="L666">                n--;</span>
+<span class="fc" id="L667">                return (e);</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">            } else if (node.S.a.equals(e)) {</span>
+<span class="fc bfc" id="L669" title="All 2 branches covered.">                if (node.S.b != null) {</span>
+<span class="fc" id="L670">                    node.S.a = node.S.b;</span>
+<span class="fc" id="L671">                    node.S.b = null;</span>
+<span class="fc" id="L672">                    n--;</span>
+<span class="fc" id="L673">                    return (e);</span>
+                } else {
+<span class="fc bfc" id="L675" title="All 2 branches covered.">                    if (node.D.b == null) {</span>
+<span class="fc" id="L676">                        node.D.b = node.D.a;</span>
+<span class="fc" id="L677">                        node.D.a = node.b;</span>
+<span class="fc" id="L678">                        node.S = node.D;</span>
+<span class="fc" id="L679">                        node.D = null;</span>
+<span class="fc" id="L680">                        node.b = null;</span>
+<span class="fc" id="L681">                        n--;</span>
+<span class="fc" id="L682">                        return (e);</span>
+<span class="fc bfc" id="L683" title="All 2 branches covered.">                    } else if (node.L.b == null) {</span>
+<span class="fc" id="L684">                        node.L.b = node.a;</span>
+<span class="fc" id="L685">                        node.a = node.b;</span>
+<span class="fc" id="L686">                        node.b = null;</span>
+<span class="fc" id="L687">                        node.S = node.D;</span>
+<span class="fc" id="L688">                        node.D = null;</span>
+<span class="fc" id="L689">                        n--;</span>
+<span class="fc" id="L690">                        return (e);</span>
+                    } else {
+<span class="fc" id="L692">                        node.S.a = node.a;</span>
+<span class="fc" id="L693">                        node.a = node.L.b;</span>
+<span class="fc" id="L694">                        node.L.b = null;</span>
+<span class="fc" id="L695">                        n--;</span>
+<span class="fc" id="L696">                        return (e);</span>
+                    }
+                }
+<span class="fc bfc" id="L699" title="All 4 branches covered.">            } else if (node.S.b != null &amp;&amp; node.S.b.equals(e)) {</span>
+<span class="fc" id="L700">                node.S.b = null;</span>
+<span class="fc" id="L701">                n--;</span>
+<span class="fc" id="L702">                return (e);</span>
+<span class="pc bpc" id="L703" title="1 of 4 branches missed.">            } else if (node.D != null &amp;&amp; node.D.a.equals(e)) {</span>
+<span class="fc bfc" id="L704" title="All 2 branches covered.">                    if(node.D.b != null){</span>
+<span class="fc" id="L705">                        node.D.a = node.D.b;</span>
+<span class="fc" id="L706">                        node.D.b = null;</span>
+<span class="fc" id="L707">                        n--;</span>
+<span class="fc" id="L708">                        return(e);</span>
+                    }else{
+<span class="fc bfc" id="L710" title="All 2 branches covered.">                        if(node.S.b != null){</span>
+<span class="fc" id="L711">                            node.D.a =node.b;</span>
+<span class="fc" id="L712">                            node.b = node.S.b;</span>
+<span class="fc" id="L713">                            node.S.b = null;</span>
+<span class="fc" id="L714">                            n--;</span>
+<span class="fc" id="L715">                            return(e);</span>
+                        }else{
+<span class="fc" id="L717">                            node.S.b = node.b;</span>
+<span class="fc" id="L718">                            node.b = null;</span>
+<span class="fc" id="L719">                            node.D = null;</span>
+<span class="fc" id="L720">                            n--;</span>
+<span class="fc" id="L721">                            return(e);</span>
+                        }
+                    }      
+<span class="fc bfc" id="L724" title="All 4 branches covered.">            }else if(node.D.b != null &amp;&amp; node.D.b.equals(e)){</span>
+<span class="fc" id="L725">                node.D.b = null;</span>
+<span class="fc" id="L726">                n--;</span>
+<span class="fc" id="L727">                    return(e);</span>
+<span class="fc bfc" id="L728" title="All 2 branches covered.">            }else if(node.a.equals(e)){</span>
+<span class="pc bpc" id="L729" title="1 of 4 branches missed.">                if(node.L.b == null &amp;&amp; node.S.b != null){</span>
+<span class="fc" id="L730">                    node.a = node.S.a;</span>
+<span class="fc" id="L731">                    node.S.a = null;</span>
+<span class="fc" id="L732">                    node.S.a = node.S.b;</span>
+<span class="fc" id="L733">                    node.S.b = null;</span>
+<span class="fc" id="L734">                    n--;</span>
+<span class="fc" id="L735">                    return(e);</span>
+<span class="pc bpc" id="L736" title="1 of 2 branches missed.">                }else if(node.L.b != null){</span>
+<span class="fc" id="L737">                    node.a = node.L.b;</span>
+<span class="fc" id="L738">                    node.L.b = null;</span>
+<span class="fc" id="L739">                    n--;</span>
+<span class="fc" id="L740">                    return(e);</span>
+                }
+            }else{
+<span class="pc bpc" id="L743" title="2 of 4 branches missed.">                if(node.S.b == null &amp;&amp; node.D.b != null){</span>
+<span class="fc" id="L744">                    node.b = node.D.a;</span>
+<span class="fc" id="L745">                    node.D.a = node.D.b;</span>
+<span class="fc" id="L746">                    node.D.b = null;</span>
+<span class="fc" id="L747">                    n--;</span>
+<span class="fc" id="L748">                    return(e);</span>
+                }
+            }
+<span class="pc bpc" id="L751" title="1 of 4 branches missed.">        } else if (globina(node) == 2 &amp;&amp; node.b == null) {</span>
+<span class="fc bfc" id="L752" title="All 2 branches covered.">            if (node.L.a.equals(e)) {</span>
+<span class="fc bfc" id="L753" title="All 2 branches covered.">                if (node.L.b != null) {</span>
+<span class="fc" id="L754">                    node.L.a = node.L.b;</span>
+<span class="fc" id="L755">                    node.L.b = null;</span>
+<span class="fc" id="L756">                    n--;</span>
+<span class="fc" id="L757">                    return (e);</span>
+                } else {
+<span class="fc bfc" id="L759" title="All 2 branches covered.">                    if (node.S.b == null) {</span>
+<span class="fc" id="L760">                        node.b = node.S.a;</span>
+<span class="fc" id="L761">                        node.S = null;</span>
+<span class="fc" id="L762">                        node.L = null;</span>
+<span class="fc" id="L763">                        n--;</span>
+<span class="fc" id="L764">                        return (e);</span>
+                    } else {
+<span class="fc" id="L766">                        node.L.a = node.a;</span>
+<span class="fc" id="L767">                        node.a = node.S.a;</span>
+<span class="fc" id="L768">                        node.S.a = node.S.b;</span>
+<span class="fc" id="L769">                        node.S.b = null;</span>
+<span class="fc" id="L770">                        n--;</span>
+<span class="fc" id="L771">                        return (e);</span>
+                    }
+                }
+<span class="fc bfc" id="L774" title="All 4 branches covered.">            } else if (node.L.b != null &amp;&amp; node.L.b.equals(e)) {</span>
+<span class="fc" id="L775">                node.L.b = null;</span>
+<span class="fc" id="L776">                n--;</span>
+<span class="fc" id="L777">                return (e);</span>
+<span class="fc bfc" id="L778" title="All 2 branches covered.">            } else if (node.S.a.equals(e)) {</span>
+<span class="fc bfc" id="L779" title="All 2 branches covered.">                if (node.S.b != null) {</span>
+<span class="fc" id="L780">                    node.S.a = node.S.b;</span>
+<span class="fc" id="L781">                    node.S.b = null;</span>
+<span class="fc" id="L782">                    n--;</span>
+<span class="fc" id="L783">                    return (e);</span>
+                } else {
+<span class="fc bfc" id="L785" title="All 2 branches covered.">                    if (node.L.b == null) {</span>
+<span class="fc" id="L786">                        node.b = node.a;</span>
+<span class="fc" id="L787">                        node.a = node.L.a;</span>
+<span class="fc" id="L788">                        node.L = null;</span>
+<span class="fc" id="L789">                        node.S = null;</span>
+<span class="fc" id="L790">                        n--;</span>
+<span class="fc" id="L791">                        return (e);</span>
+                    } else {
+<span class="fc" id="L793">                        node.S.a = node.a;</span>
+<span class="fc" id="L794">                        node.a = node.L.b;</span>
+<span class="fc" id="L795">                        node.L.b = null;</span>
+<span class="fc" id="L796">                        n--;</span>
+<span class="fc" id="L797">                        return (e);</span>
+                    }
+                }
+<span class="pc bpc" id="L800" title="1 of 2 branches missed.">            } else if (node.a.equals(e)) {</span>
+<span class="fc bfc" id="L801" title="All 4 branches covered.">                if (node.L.b == null &amp;&amp; node.S.b == null) {</span>
+<span class="fc" id="L802">                    node.a = node.L.a;</span>
+<span class="fc" id="L803">                    node.b = node.S.a;</span>
+<span class="fc" id="L804">                    node.L = null;</span>
+<span class="fc" id="L805">                    node.S = null;</span>
+<span class="fc" id="L806">                    n--;</span>
+<span class="fc" id="L807">                    return (e);</span>
+<span class="fc bfc" id="L808" title="All 4 branches covered.">                } else if (node.L.b != null &amp;&amp; node.S.b != null) {</span>
+<span class="fc" id="L809">                    node.a = node.S.a;</span>
+<span class="fc" id="L810">                    node.S.a = node.S.b;</span>
+<span class="fc" id="L811">                    node.S.b = null;</span>
+<span class="fc" id="L812">                    n--;</span>
+<span class="fc" id="L813">                    return (e);</span>
+<span class="pc bpc" id="L814" title="1 of 4 branches missed.">                } else if (node.L.b != null &amp;&amp; node.S.b == null) {</span>
+<span class="fc" id="L815">                    node.a = node.L.b;</span>
+<span class="fc" id="L816">                    node.L.b = null;</span>
+<span class="fc" id="L817">                    n--;</span>
+<span class="fc" id="L818">                    return (e);</span>
+                } else {
+<span class="fc" id="L820">                    node.a = node.S.a;</span>
+<span class="fc" id="L821">                    node.S.a = node.S.b;</span>
+<span class="fc" id="L822">                    node.S.b = null;</span>
+<span class="fc" id="L823">                    n--;</span>
+<span class="fc" id="L824">                    return (e);</span>
+                }
+            }
+        }
+<span class="fc" id="L828">        return null;</span>
+    }
+
+    @Override
+    public Tip remove(Tip e) {
+<span class="pc bpc" id="L833" title="1 of 4 branches missed.">        if (rootNode.a == null || !obstaja(e, rootNode)) {</span>
+<span class="fc" id="L834">            return null;</span>
+        } else {
+<span class="fc" id="L836">            return (odstrani(e, rootNode));</span>
+        }
+    }
+
+    public boolean obstaja(Tip e, Element23 node) {
+<span class="fc bfc" id="L841" title="All 4 branches covered.">        if (node == null || node.a == null) {</span>
+<span class="fc" id="L842">            return false;</span>
+<span class="fc bfc" id="L843" title="All 2 branches covered.">        } else if (node.a == e) {</span>
+<span class="fc" id="L844">            return true;</span>
+<span class="fc bfc" id="L845" title="All 2 branches covered.">        } else if (node.b == e) {</span>
+<span class="fc" id="L846">            return true;</span>
+        } else {
+<span class="fc bfc" id="L848" title="All 2 branches covered.">            if (primerjava(node.a, e)) {</span>
+<span class="fc" id="L849">                return obstaja(e, node.L);</span>
+<span class="fc bfc" id="L850" title="All 4 branches covered.">            } else if (node.b != null &amp;&amp; primerjava(e, node.b)) {</span>
+<span class="fc" id="L851">                return obstaja(e, node.D);</span>
+            } else {
+<span class="fc" id="L853">                return obstaja(e, node.S);</span>
+            }
+        }
+    }
+
+    @Override
+    public boolean exists(Tip e) {
+<span class="fc bfc" id="L860" title="All 2 branches covered.">        if (rootNode == null) {</span>
+<span class="fc" id="L861">            return false;</span>
+        } else {
+<span class="fc" id="L863">            return (obstaja(e, rootNode));</span>
+        }
+
+    }
+    
+    
+ 
+
+<span class="fc" id="L871">    List&lt;Tip&gt; vrni = new ArrayList&lt;Tip&gt;();</span>
+
+    @Override
+    public List asList() {
+<span class="fc" id="L875">        vrni = new ArrayList&lt;Tip&gt;();</span>
+<span class="fc bfc" id="L876" title="All 2 branches covered.">        if (rootNode == null) {</span>
+<span class="fc" id="L877">            return null;</span>
+        } else {
+<span class="fc" id="L879">            preorder(rootNode);</span>
+        }
+<span class="fc" id="L881">        return vrni;</span>
+    }
+
+    public void preorder(Element23 node) {
+<span class="fc bfc" id="L885" title="All 2 branches covered.">        if (node == null) {</span>
+<span class="fc" id="L886">            return;</span>
+        }
+
+<span class="fc bfc" id="L889" title="All 2 branches covered.">        if (node.b != null) {</span>
+<span class="fc" id="L890">            vrni.add(node.a);</span>
+<span class="fc" id="L891">            vrni.add(node.b);</span>
+        } else {
+<span class="fc" id="L893">            vrni.add(node.a);</span>
+        }
+
+<span class="fc" id="L896">        preorder(node.L);</span>
+
+<span class="fc" id="L898">        preorder(node.S);</span>
+<span class="fc bfc" id="L899" title="All 2 branches covered.">        if (node.b != null) {</span>
+<span class="fc" id="L900">            preorder(node.D);</span>
+        }
+
+<span class="fc" id="L903">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

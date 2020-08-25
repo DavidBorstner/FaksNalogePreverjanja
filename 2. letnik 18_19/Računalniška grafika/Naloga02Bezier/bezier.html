@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Grafika naloga 2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <h1 align="center">Naloga RG 2</h1>
+</head>
+<body>
+        
+        <label>Navodila: Za dodajanje krivulje mora biti gumb risanje zelen, ko je gumb zelen lahko dodajamo nove krivulje z kliki. 
+            Za premikanje vozlišč mora biti gumb premikanje zelen, vozlišča premikamo ta kliknemo na želeno vozlišče in ga povlečemo na želeno mesto.
+            Za brisanje krivulj mora biti gumb brisanje zelen, krivulje tako brišemo, da kliknemo na želeno vozlišče, ki se izbriše.
+            Za ustvarjanje nove zlepljenke pritisnemo gumb nova zlepljenka.
+            Če želimo spremeniti barvo vseh krivulj izberemo barvo z dropdown menija ter potrdimo z pritiskom na gumb spremeni barvo.</label><br><br>
+        <div>
+            <button  onclick="novaKrivulja()">Nova zlepljenka</button><div style="width:50px;height:auto;display:inline-block;"></div>
+    
+            <button id="ris" style="background: green;" onclick="omogoci()">Risanje</button>
+            <button id="prem" style="background: red" onclick="onemogoci()">Premikanje</button> 
+            <button id="bris" style=" background: red;" onclick="brisi()">Brisanje krivulj</button>
+            <div style="width:50px;height:auto;display:inline-block;"></div>
+            <select id="barve" >
+                <option style="background:black;" val="black">Black</option>
+                <option style="background:green;"val="green">Green</option>
+                <option style="background:yellow;"val="yellow">Yellow</option>
+                <option style="background:blue;"val="blue">Blue</option>
+                <option style="background:pink;"val="pink">Pink</option>
+                <option style="background:red;" val="red">Red</option>
+            </select>
+            <button  onclick="SpremeniBarvo()">Spremeni barvo</button>
+        </div>
+   
+        
+    
+                  
+              
+        <div style="float: left;">
+        <canvas position="absolute" id="canvas" width="1000" height="650" style="border:1px solid #d3d3d3; border-color: black;" ></canvas></br><br>
+        </div>
+        
+        
+    
+<script src="bezier.js"></script>
+</body>
+</html> 
+
+

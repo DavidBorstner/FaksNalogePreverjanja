@@ -1,0 +1,1216 @@
+#Nastavi direktorij
+setwd("C:/Users/David/Desktop/nba")
+getwd()
+
+#Odpri podatke ter jih shrani v tekme
+tekme <- read.table("regular.txt", header = T, sep = ",")
+summary(tekme)
+names(tekme)
+
+
+##################### NALOZI KNJIZNICE
+
+install.packages(c("ipred", "prodlim", "CORElearn", "e1071", "randomForest", "kernlab", "nnet"))
+library(ipred)
+library(CORElearn)
+library(e1071)
+library(randomForest)
+library(rpart)
+
+
+testna <- tekme[tekme$SEASON == "2016-17",]
+ucna <- tekme[tekme$SEASON == "2015-16" | tekme$SEASON == "2014-15" ,]
+
+###########################
+#EKIPE
+DOMACI <- c(ucna["HOME"])
+GOSTI <- c(ucna["AWAY"])
+DATUM <- c(ucna["DATE"])
+SEZONA <- c(ucna["SEASON"])
+
+#########################################################
+#     REGRESIJA UCNA
+#########################
+#STATISTIKA DOMAÈI
+H_PTS <- c(as.numeric(unlist(ucna["HPTS"]))) #Tocke
+H_2PM <- c(as.numeric(unlist(ucna["H2PM"]))) #Zadete 2jke
+H_2PA <- c(as.numeric(unlist(ucna["H2PA"]))) #Vržene 2jke
+H_3PM <- c(as.numeric(unlist(ucna["H3PM"]))) #Zadete 3jke
+H_3PA <- c(as.numeric(unlist(ucna["H3PA"]))) #Vržene 3jke
+H_FTM <- c(as.numeric(unlist(ucna["HFTM"]))) #Zadeti prosti
+H_FTA <- c(as.numeric(unlist(ucna["HFTA"]))) #Vrženi prosti
+H_ORB <- c(as.numeric(unlist(ucna["HORB"]))) #Skoki v napadu
+H_DRB <- c(as.numeric(unlist(ucna["HDRB"]))) #Skoki v obrambi
+H_AST <- c(as.numeric(unlist(ucna["HAST"]))) #Asistence
+H_STL <- c(as.numeric(unlist(ucna["HSTL"]))) #Ukradene žoge
+H_TOV <- c(as.numeric(unlist(ucna["HTOV"]))) #Izgulbljene žoge
+H_BLK <- c(as.numeric(unlist(ucna["HBLK"]))) #Bloki
+H_PF <- c(as.numeric(unlist(ucna["HPF"]))) #Osebne
+H_FG = H_2PA + H_3PA #Meti iz igre
+H_FGM = H_2PM + H_3PM #Meti iz igre
+
+#########################
+#POVPREÈJE DOMAÈI
+H_AVGFT = H_FTM/H_FTA * 100
+H_AVG2P = H_2PM/H_2PA * 100
+H_AVG3P = H_3PM/H_3PA * 100
+H_AVGFG = H_FGM/H_FG * 100
+
+
+############################
+#STATISTIKA GOSTJE
+A_PTS <- c(as.numeric(unlist(ucna["APTS"])))
+A_2PM <- c(as.numeric(unlist(ucna["A2PM"])))
+A_2PA <- c(as.numeric(unlist(ucna["A2PA"])))
+A_3PM <- c(as.numeric(unlist(ucna["A3PM"])))
+A_3PA <- c(as.numeric(unlist(ucna["A3PA"])))
+A_FTM <- c(as.numeric(unlist(ucna["AFTM"])))
+A_FTA <- c(as.numeric(unlist(ucna["AFTA"])))
+A_ORB <- c(as.numeric(unlist(ucna["AORB"])))
+A_DRB <- c(as.numeric(unlist(ucna["ADRB"])))
+A_AST <- c(as.numeric(unlist(ucna["AAST"])))
+A_STL <- c(as.numeric(unlist(ucna["ASTL"]))) 
+A_TOV <- c(as.numeric(unlist(ucna["ATOV"]))) 
+A_BLK <- c(as.numeric(unlist(ucna["ABLK"]))) 
+A_PF <- c(as.numeric(unlist(ucna["APF"]))) 
+A_FG = A_2PA + A_3PA
+A_FGM = A_2PM + A_3PM 
+
+#########################
+#POVPREÈJA GOSTJE
+A_AVGFT = A_FTM/A_FTA * 100
+A_AVG2P = A_2PM/A_2PA * 100
+A_AVG3P = A_3PM/A_3PA * 100
+A_AVGFG = A_FGM/A_FG * 100
+
+########################
+#NAPREDNA STATISTIKA
+
+H_POS = H_FG - H_ORB + H_TOV + (0.4 * H_FTA)
+H_OE = (H_PTS * 100)/H_POS # Napadalna uèinkovitost
+H_eFG = (H_FGM + (0.5 * H_3PM))/H_FG #uèinkovitost meta iz igre
+H_TO = H_TOV/H_POS #Igubljene žoge glede na posest
+H_ORP = H_ORB/(H_ORB + A_DRB) #verjetnost skoka v napadu
+H_FTR = H_FTA/H_FG # Verjetnost prostih metov
+
+
+A_POS = A_FG - A_ORB + A_TOV + (0.4 * A_FTA) #Posesti
+A_OE = (A_PTS * 100)/A_POS # Napadalna uèinkovitost
+A_eFG = (A_FGM + (0.5 * A_3PM))/A_FG #uèinkovitost meta iz igre
+A_TO = A_TOV/A_POS #Igubljene žoge glede na posest
+A_ORP = A_ORB/(A_ORB + H_DRB) #verjetnost skoka v napadu
+A_FTR = A_FTA/A_FG # Verjetnost prostih metov
+
+ 
+
+####################################
+#Nastavi vektor za zmage ter jih dodaja
+ZMAGA <- c()
+
+for(i in 1:nrow(ucna)){
+	if(ucna[i, "HPTS"] > ucna[i, "APTS"]){
+		ZMAGA <- c(ZMAGA,"H")
+	}else{
+		ZMAGA <- c(ZMAGA,"A")
+	}
+}
+
+RAZLIKA <- c()
+for(i in 1:nrow(ucna)){
+	RAZLIKA <- c(RAZLIKA, ucna[i, "HPTS"] - ucna[i, "APTS"])
+}
+
+regresija_ucna <- data.frame(H_AVGFT, H_FTA,H_AVGFG, H_AVG3P, H_AVG2P,H_DRB,H_AST, H_STL, H_TOV, H_BLK, H_PF, H_FG, H_FGM, H_POS, H_OE, H_eFG, H_TO, H_ORP, H_FTR,
+					 A_AVGFT, A_FTA,A_AVGFG, A_AVG3P, A_AVG2P,A_DRB,A_AST, A_STL, A_TOV, A_BLK, A_PF, A_FG, A_FGM, A_POS, A_OE, A_eFG, A_TO, A_ORP, A_FTR, RAZLIKA)
+
+
+
+#####################################################################
+#       REGRESIJA TESTNA
+#########################
+#STATISTIKA DOMAÈI
+H_PTS <- c(as.numeric(unlist(testna["HPTS"]))) #Tocke
+H_2PM <- c(as.numeric(unlist(testna["H2PM"]))) #Zadete 2jke
+H_2PA <- c(as.numeric(unlist(testna["H2PA"]))) #Vržene 2jke
+H_3PM <- c(as.numeric(unlist(testna["H3PM"]))) #Zadete 3jke
+H_3PA <- c(as.numeric(unlist(testna["H3PA"]))) #Vržene 3jke
+H_FTM <- c(as.numeric(unlist(testna["HFTM"]))) #Zadeti prosti
+H_FTA <- c(as.numeric(unlist(testna["HFTA"]))) #Vrženi prosti
+H_ORB <- c(as.numeric(unlist(testna["HORB"]))) #Skoki v napadu
+H_DRB <- c(as.numeric(unlist(testna["HDRB"]))) #Skoki v obrambi
+H_AST <- c(as.numeric(unlist(testna["HAST"]))) #Asistence
+H_STL <- c(as.numeric(unlist(testna["HSTL"]))) #Ukradene žoge
+H_TOV <- c(as.numeric(unlist(testna["HTOV"]))) #Izgulbljene žoge
+H_BLK <- c(as.numeric(unlist(testna["HBLK"]))) #Bloki
+H_PF <- c(as.numeric(unlist(testna["HPF"]))) #Osebne
+H_FG = H_2PA + H_3PA #Meti iz igre
+H_FGM = H_2PM + H_3PM #Meti iz igre
+
+#########################
+#POVPREÈJE DOMAÈI
+H_AVGFT = H_FTM/H_FTA * 100
+H_AVG2P = H_2PM/H_2PA * 100
+H_AVG3P = H_3PM/H_3PA * 100
+H_AVGFG = H_FGM/H_FG * 100
+
+
+############################
+#STATISTIKA GOSTJE
+A_PTS <- c(as.numeric(unlist(testna["APTS"])))
+A_2PM <- c(as.numeric(unlist(testna["A2PM"])))
+A_2PA <- c(as.numeric(unlist(testna["A2PA"])))
+A_3PM <- c(as.numeric(unlist(testna["A3PM"])))
+A_3PA <- c(as.numeric(unlist(testna["A3PA"])))
+A_FTM <- c(as.numeric(unlist(testna["AFTM"])))
+A_FTA <- c(as.numeric(unlist(testna["AFTA"])))
+A_ORB <- c(as.numeric(unlist(testna["AORB"])))
+A_DRB <- c(as.numeric(unlist(testna["ADRB"])))
+A_AST <- c(as.numeric(unlist(testna["AAST"])))
+A_STL <- c(as.numeric(unlist(testna["ASTL"]))) 
+A_TOV <- c(as.numeric(unlist(testna["ATOV"]))) 
+A_BLK <- c(as.numeric(unlist(testna["ABLK"]))) 
+A_PF <- c(as.numeric(unlist(testna["APF"]))) 
+A_FG = A_2PA + A_3PA
+A_FGM = A_2PM + A_3PM 
+
+#########################
+#POVPREÈJA GOSTJE
+A_AVGFT = A_FTM/A_FTA * 100
+A_AVG2P = A_2PM/A_2PA * 100
+A_AVG3P = A_3PM/A_3PA * 100
+A_AVGFG = A_FGM/A_FG * 100
+
+########################
+#NAPREDNA STATISTIKA
+
+H_POS = H_FG - H_ORB + H_TOV + (0.4 * H_FTA)
+H_OE = (H_PTS * 100)/H_POS # Napadalna uèinkovitost
+H_eFG = (H_FGM + (0.5 * H_3PM))/H_FG #uèinkovitost meta iz igre
+H_TO = H_TOV/H_POS #Igubljene žoge glede na posest
+H_ORP = H_ORB/(H_ORB + A_DRB) #verjetnost skoka v napadu
+H_FTR = H_FTA/H_FG # Verjetnost prostih metov
+
+
+
+A_POS = A_FG - A_ORB + A_TOV + (0.4 * A_FTA) #Posesti
+A_OE = (A_PTS * 100)/A_POS # Napadalna uèinkovitost
+A_eFG = (A_FGM + (0.5 * A_3PM))/A_FG #uèinkovitost meta iz igre
+A_TO = A_TOV/A_POS #Igubljene žoge glede na posest
+A_ORP = A_ORB/(A_ORB + H_DRB) #verjetnost skoka v napadu
+A_FTR = A_FTA/A_FG # Verjetnost prostih metov
+
+ 
+
+####################################
+#Nastavi vektor za zmage ter jih dodaja
+ZMAGA <- c()
+
+for(i in 1:nrow(testna)){
+	if(testna[i, "HPTS"] > testna[i, "APTS"]){
+		ZMAGA <- c(ZMAGA,"H")
+	}else{
+		ZMAGA <- c(ZMAGA,"A")
+	}
+}
+
+RAZLIKA <- c()
+for(i in 1:nrow(testna)){
+	RAZLIKA <- c(RAZLIKA, testna[i, "HPTS"] - testna[i, "APTS"])
+}
+
+regresija_testna <- data.frame(H_AVGFT, H_FTA,H_AVGFG, H_AVG3P, H_AVG2P,H_DRB,H_AST, H_STL, H_TOV, H_BLK, H_PF, H_FG, H_FGM, H_POS, H_OE, H_eFG, H_TO, H_ORP, H_FTR,
+					 A_AVGFT, A_FTA,A_AVGFG, A_AVG3P, A_AVG2P,A_DRB,A_AST, A_STL, A_TOV, A_BLK, A_PF, A_FG, A_FGM, A_POS, A_OE, A_eFG, A_TO, A_ORP, A_FTR, RAZLIKA)
+
+
+
+
+
+#########
+# IZRIS #
+#########
+
+#Delež domaèih zmag proti gostujoèim
+pieZmaga <- c(table(ZMAGA))
+pie(table(ZMAGA),main="Primerjava zmage domaèi/gostje")
+
+####################################
+#Stevilo zadetih trojk na sezono
+Sezone <- levels(tekme[1,]$SEASON)
+
+VSI_3PA <- c(as.numeric(unlist(tekme["H3PA"])+as.numeric(unlist(tekme["A3PA"]))))
+VSI_3PM <- c(as.numeric(unlist(tekme["H3PM"])+ as.numeric(unlist(tekme["A3PM"]))))
+VSI_AVG3P = VSI_3PM/VSI_3PA
+
+povprecje_sez1 = mean(VSI_AVG3P[1:1230])
+povprecje_sez2 = mean(VSI_AVG3P[1231:2460])
+povprecje_sez3 = mean(VSI_AVG3P[2461:3690])
+
+povprecja_3PT <- c(povprecje_sez1,povprecje_sez2, povprecje_sez3)
+df <- data.frame(Sezone,povprecja_3PT)
+names(povprecja_3PT) <- Sezone
+plot(df, xlab="Sezona", ylab="Povpreèje zadetih trojk") 
+
+
+####################################
+# STEVILO ZMAG NA EKIPO
+
+ekipe <- levels(tekme[1,]$HOME)
+ST_ZMAG = rep(0,length(ekipe))
+for(i in 1:nrow(tekme)){
+	for(st in 1:length(ekipe)){
+		if(tekme[i,]$HOME == ekipe[st]){
+			if(tekme[i,]$HPTS > tekme[i,]$APTS){
+				ST_ZMAG[st] = ST_ZMAG[st] + 1
+			}
+		}
+		if(tekme[i,]$AWAY == ekipe[st]){
+			if(tekme[i,]$HPTS < tekme[i,]$APTS){
+				ST_ZMAG[st] = ST_ZMAG[st] + 1
+			}
+		}
+	}
+}
+podatki_zmage <- data.frame(ekipe,ST_ZMAG)
+names(ST_ZMAG) <- ekipe
+hist(ST_ZMAG/3, xlab ="Število zmag", ylab="Frekvenca", main="Povpreèno število zmag na sezono")
+
+
+###############################
+# STEVILO ZMAG PRVI TRIJE
+
+zmage_vse <- data.frame(ST_ZMAG)
+zmage_vse <- zmage_vse[order(zmage_vse$ST_ZMAG,decreasing = TRUE),]
+zmage_vse <- zmage_vse[1:3]
+prvi <- c("GSW","SAS","CLE")
+pie(zmage_vse, label = prvi)
+
+################################################
+# STEVILO IZGUBLJENIH ZOG NA EKIPO
+
+TO = rep(0,length(ekipe)) #vse izgubljene žoge
+for(i in 1:nrow(tekme)){
+	for(st in 1:length(ekipe)){
+		if(tekme[i,]$HOME == ekipe[st]){
+			TO[st] = TO[st] + tekme[i,]$HTOV
+		}
+
+		if(tekme[i,]$AWAY == ekipe[st]){
+			TO[st] = TO[st] + tekme[i,]$ATOV
+		}
+		
+	}
+}
+
+delez_zmagAH = ST_ZMAG_GOSTE / ST_ZMAG_DOMA
+
+barplot(TO/246, names=ekipe, main="Stevilo izgubljenih žog na tekmo")
+
+
+
+
+##################################
+#         KLASIFIKACIJA			 #
+##################################
+setwd("D:\\tilen\\faks\\Umetna inteligenca\\1.seminarska")
+getwd()
+tekme <- read.table("regular.txt", header = T, sep = ",")
+
+# funkcije, ki jih potrebujemo za izvedbo precnega preverjanja 
+
+mypredict.generic <- function(object, newdata){predict(object, newdata, type = "class")}
+mymodel.coremodel <- function(formula, data, target.model){CoreModel(formula, data, model=target.model)}
+mypredict.coremodel <- function(object, newdata) {pred <- predict(object, newdata)$class; destroyModels(object); pred}
+
+#
+
+
+KDO_ZMAGA <- c()
+
+#################
+#STATISTIKA HOME & AWAY
+
+SH_PTS <- c()
+SH_2PM <- c()
+SH_2PA <- c()
+SH_3PM <- c()
+SH_3PA <- c()
+SH_FTM <- c()
+SH_FTA <- c()
+SH_ORB <- c()
+SH_DRB <- c()
+SH_AST <- c()
+SH_STL <- c()
+SH_TOV <- c()
+SH_BLK <- c()
+SH_PF <- c()
+SH_FG <- c()
+SH_FGM <- c()
+ST_ZMAG_DOMA <- c()
+
+SA_PTS <- c()
+SA_2PM <- c()
+SA_2PA <- c()
+SA_3PM <- c()
+SA_3PA <- c()
+SA_FTM <- c()
+SA_FTA <- c()
+SA_ORB <- c()
+SA_DRB <- c()
+SA_AST <- c()
+SA_STL <- c()
+SA_TOV <- c()
+SA_BLK <- c()
+SA_PF <- c()
+SA_FG <- c()
+SA_FGM <- c()
+ST_ZMAG_AWAY <- c()
+
+############################################
+#       FUNKCIJE ZA KLASIFIKACIJO          #
+############################################
+
+povprecje <- function(pretekle_tekme_ekipe, spremenljivka){
+	if(length(pretekle_tekme_ekipe) == 0){
+		0;
+	} else {
+		mean(pretekle_tekme_ekipe[, spremenljivka])
+	}
+}
+
+CA <- function(prave, napovedane)
+{
+	t <- table(prave, napovedane)
+
+	sum(diag(t)) / sum(t)
+}
+
+Brier.score <- function(observedMat, predictedMat){
+	sum((observedMat - predictedMat) ^ 2) / nrow(predictedMat)
+}
+
+for(i in 1:nrow(tekme)){
+	trenutni_datum <- tekme[i, "DATE"]
+	ime_ekipe_HOME <- tekme[i, "HOME"]
+	pretekle_tekme_ekipe_HOME <- tekme[tekme$DATE < trenutni_datum & tekme$HOME == ime_ekipe_HOME,]
+	if(tekme$HPTS[i] < tekme$APTS[i]){
+		KDO_ZMAGA <- c(KDO_ZMAGA, "A")
+	} else {
+		KDO_ZMAGA <- c(KDO_ZMAGA, "H")
+	}
+	
+	SH_PTS <- c(SH_PTS, povprecje(pretekle_tekme_ekipe_HOME, "HPTS"))
+	SH_2PM <- c(SH_2PM, povprecje(pretekle_tekme_ekipe_HOME, "H2PM"))
+	SH_2PA <- c(SH_2PA, povprecje(pretekle_tekme_ekipe_HOME, "H2PA"))
+	SH_3PM <- c(SH_3PM, povprecje(pretekle_tekme_ekipe_HOME, "H3PM"))
+	SH_3PA <- c(SH_3PA, povprecje(pretekle_tekme_ekipe_HOME, "H3PA"))
+	SH_FTM <- c(SH_FTM, povprecje(pretekle_tekme_ekipe_HOME, "HFTM"))
+	SH_FTA <- c(SH_FTA, povprecje(pretekle_tekme_ekipe_HOME, "HFTA"))
+	SH_ORB <- c(SH_ORB, povprecje(pretekle_tekme_ekipe_HOME, "HORB"))
+	SH_DRB <- c(SH_DRB, povprecje(pretekle_tekme_ekipe_HOME, "HDRB"))
+	SH_AST <- c(SH_AST, povprecje(pretekle_tekme_ekipe_HOME, "HAST"))
+	SH_STL <- c(SH_STL, povprecje(pretekle_tekme_ekipe_HOME, "HSTL"))
+	SH_TOV <- c(SH_TOV, povprecje(pretekle_tekme_ekipe_HOME, "HTOV"))
+	SH_BLK <- c(SH_BLK, povprecje(pretekle_tekme_ekipe_HOME, "HBLK"))
+	SH_PF <- c(SH_PF, povprecje(pretekle_tekme_ekipe_HOME, "HPF"))
+	ST_ZMAG_DOMA <- c(ST_ZMAG_DOMA, nrow(pretekle_tekme_ekipe_HOME[pretekle_tekme_ekipe_HOME$HPTS > pretekle_tekme_ekipe_HOME$APTS,]))
+	
+	ime_ekipe_AWAY <- tekme[i, "AWAY"]
+	pretekle_tekme_ekipe_AWAY <- tekme[tekme$DATE < trenutni_datum & tekme$AWAY == ime_ekipe_AWAY,]
+	
+	SA_PTS <- c(SA_PTS, povprecje(pretekle_tekme_ekipe_AWAY, "APTS"))
+	SA_2PM <- c(SA_2PM, povprecje(pretekle_tekme_ekipe_AWAY, "A2PM"))
+	SA_2PA <- c(SA_2PA, povprecje(pretekle_tekme_ekipe_AWAY, "A2PA"))
+	SA_3PM <- c(SA_3PM, povprecje(pretekle_tekme_ekipe_AWAY, "A3PM"))
+	SA_3PA <- c(SA_3PA, povprecje(pretekle_tekme_ekipe_AWAY, "A3PA"))
+	SA_FTM <- c(SA_FTM, povprecje(pretekle_tekme_ekipe_AWAY, "AFTM"))
+	SA_FTA <- c(SA_FTA, povprecje(pretekle_tekme_ekipe_AWAY, "AFTA"))
+	SA_ORB <- c(SA_ORB, povprecje(pretekle_tekme_ekipe_AWAY, "AORB"))
+	SA_DRB <- c(SA_DRB, povprecje(pretekle_tekme_ekipe_AWAY, "ADRB"))
+	SA_AST <- c(SA_AST, povprecje(pretekle_tekme_ekipe_AWAY, "AAST"))
+	SA_STL <- c(SA_STL, povprecje(pretekle_tekme_ekipe_AWAY, "ASTL"))
+	SA_TOV <- c(SA_TOV, povprecje(pretekle_tekme_ekipe_AWAY, "ATOV"))
+	SA_BLK <- c(SA_BLK, povprecje(pretekle_tekme_ekipe_AWAY, "ABLK"))
+	SA_PF <- c(SA_PF, povprecje(pretekle_tekme_ekipe_AWAY, "APF"))
+	ST_ZMAG_AWAY <- c(ST_ZMAG_AWAY, nrow(pretekle_tekme_ekipe_AWAY[pretekle_tekme_ekipe_AWAY$APTS > pretekle_tekme_ekipe_AWAY$HPTS,]))
+}
+
+SH_FG <- SH_2PA + SH_3PA
+SH_FGM <- SH_3PM + SH_3PM
+
+SA_FG <- SA_2PA + SA_3PA
+SA_FGM <- SA_3PM + SA_3PM
+
+#NAPREDNA STATISTIKA
+
+SH_POS = 0.96*(SH_FG - SH_ORB - SH_TOV +(0.4*SH_FTA)) #Posesti
+SH_OE = (SH_PTS * 100)/SH_POS # Napadalna uèinkovitost
+SH_eFG = (SH_FG + (0.5 * SH_3PM))/SH_FGM #uèinkovitost meta iz igre
+SH_TO = SH_TOV/SH_POS #Igubljene žoge glede na posest
+SH_ORP = SH_ORB/(SH_ORB + SA_DRB) #verjetnost skoka v napadu
+SH_FTR = SH_FTA/SH_FG # Verjetnost prostih metov
+
+SA_POS = 0.96*(SA_FG - SA_ORB - SA_TOV +(0.4*SA_FTA)) #Posesti
+SA_OE = (SA_PTS * 100)/SA_POS # Napadalna uèinkovitost
+SA_eFG = (SA_FG + (0.5 * SA_3PM))/SA_FGM #uèinkovitost meta iz igre
+SA_TO = SA_TOV/SA_POS #Igubljene žoge glede na posest
+SA_ORP = SA_ORB/(SA_ORB + SH_DRB) #verjetnost skoka v napadu
+SA_FTR = SA_FTA/SA_FG # Verjetnost prostih metov
+
+################################
+
+
+##################################
+# RAZMERJA MED AWAY proti HOME
+
+SAH_PTS <- SA_PTS / SH_PTS
+SAH_2PM <- SA_2PM / SH_2PM
+SAH_2PA <- SA_2PA / SH_2PA
+SAH_3PM <- SA_3PM / SH_3PM
+SAH_3PA <- SA_3PA / SH_3PA
+SAH_FTM <- SA_FTM / SH_FTM
+SAH_FTA <- SA_FTA / SH_FTA
+SAH_ORB <- SA_ORB / SH_ORB
+SAH_DRB <- SA_DRB / SH_DRB
+SAH_AST <- SA_AST / SH_AST
+SAH_STL <- SA_STL / SH_STL
+SAH_TOV <- SA_TOV / SH_TOV
+SAH_BLK <- SA_BLK / SH_BLK
+SAH_PF <- SA_PF / SH_PF
+SAH_FG <- SA_FG / SH_FG
+SAH_FGM <- SA_FGM / SH_FGM
+
+tekme_z_statistiko <- data.frame(KDO_ZMAGA, SAH_PTS, SAH_2PM, SAH_2PA, SAH_3PM,
+				SAH_3PA, SAH_FTM, SAH_FTA, SAH_ORB, SAH_DRB, SAH_AST,
+				SAH_STL, SAH_TOV, SAH_BLK, SAH_PF, SAH_FG, SAH_FGM,
+				ST_ZMAG_DOMA, ST_ZMAG_AWAY, SH_POS, SH_OE, SH_eFG, SH_TO,
+				SH_ORP, SH_FTR, SA_POS, SA_OE, SA_eFG, SA_TO, SA_ORP, SA_FTR)
+
+##### uzemi samo tiste, ki majo statistiko
+tekme_z_statistiko <- tekme_z_statistiko[tekme_z_statistiko$SAH_PTS != "NaN" & tekme_z_statistiko$SAH_PTS != "NaN",]
+
+
+
+#
+#
+####### ODLOCITVENO DREVO z uporabo knjiznice "rpart"
+#
+#
+
+
+###################################################
+#             glede na stevilo zmag z "rpart"     #
+###################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.753)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+dt <- rpart(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna)
+plot(dt)
+text(dt, pretty = 0)
+
+observed <- testna$KDO_ZMAGA
+predicted <- predict(dt, testna, type = "class")
+table(observed, predicted)
+
+CA(observed, predicted)
+
+predMat <- predict(dt, testna, type = "prob")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = rpart, predict = mypredict.generic)
+
+##### z knjiznico "CORElearn"
+
+cl_dt <- CoreModel(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna, model="tree")
+plot(cl_dt, ucna)
+
+predicted <- predict(cl_dt, testna, type = "class")
+table(observed, predicted)
+CA(observed, predicted)
+
+predMat <- predict(cl_dt, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna,model = mymodel.coremodel, predict = mypredict.coremodel, target.model="tree")
+
+
+###################################################
+#             glede na napredno  statistiko       #
+###################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.755)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+dt <- rpart(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna)
+plot(dt)
+text(dt, pretty = 0)
+
+observed <- testna$KDO_ZMAGA
+predicted <- predict(dt, testna, type = "class")
+table(observed, predicted)
+
+CA(observed, predicted)
+
+predMat <- predict(dt, testna, type = "prob")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = rpart, predict = mypredict.generic)
+
+##### z knjiznico "CORElearn"
+
+cl_dt <- CoreModel(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna, model="tree")
+plot(cl_dt, ucna)
+
+predicted <- predict(cl_dt, testna, type = "class")
+table(observed, predicted)
+CA(observed, predicted)
+
+predMat <- predict(cl_dt, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna,model = mymodel.coremodel, predict = mypredict.coremodel, target.model="tree")
+
+
+###############################
+#   glede na vse podatke      #
+###############################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.738)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+dt <- rpart(KDO_ZMAGA ~ ., data = ucna)
+plot(dt)
+text(dt, pretty = 0)
+
+observed <- testna$KDO_ZMAGA
+predicted <- predict(dt, testna, type = "class")
+table(observed, predicted)
+
+CA(observed, predicted)
+
+predMat <- predict(dt, testna, type = "prob")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = rpart, predict = mypredict.generic)
+
+##### z knjiznico "CORElearn"
+
+cl_dt <- CoreModel(KDO_ZMAGA ~ ., data = ucna, model="tree")
+plot(cl_dt, ucna)
+
+predicted <- predict(cl_dt, testna, type = "class")
+table(observed, predicted)
+CA(observed, predicted)
+
+predMat <- predict(cl_dt, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna,model = mymodel.coremodel, predict = mypredict.coremodel, target.model="tree")
+
+
+#
+#
+####### NAIVNI BAYESOV KLASIFIKATOR
+#
+#
+
+##############################################################################
+#       gradnja modela s pomocjo knjiznice "e1071" glede na vse podatke      #
+##############################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.755)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+nb <- naiveBayes(KDO_ZMAGA ~ ., data = ucna)
+predicted <- predict(nb, testna, type="class")
+observed <- testna$KDO_ZMAGA
+
+CA(observed, predicted)
+
+predMat <- predict(nb, testna, type = "raw")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = naiveBayes, predict = mypredict.generic)
+
+# z knjiznico "CORElearn"
+
+cl_nb <- CoreModel(KDO_ZMAGA ~ ., data = ucna, model="bayes")
+predicted <- predict(cl_nb, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl_nb, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna,model = mymodel.coremodel, predict = mypredict.coremodel, target.model="tree")
+
+
+########################################################################################
+#     gradnja modela s pomocjo knjiznice "e1071" glede na stevilo zmag home / away     #
+########################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.76)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+nb <- naiveBayes(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna)
+predicted <- predict(nb, testna, type="class")
+observed <- testna$KDO_ZMAGA
+
+CA(observed, predicted)
+
+predMat <- predict(nb, testna, type = "raw")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = naiveBayes, predict = mypredict.generic)
+
+# z knjiznico "CORElearn"
+
+cl_nb <- CoreModel(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna, model="bayes")
+predicted <- predict(cl_nb, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl_nb, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna,model = mymodel.coremodel, predict = mypredict.coremodel, target.model="tree")
+
+
+###################################################################################
+#      gradnja modela s pomocjo knjiznice "e1071" glede na napredno statistiko    #
+###################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.74)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+nb <- naiveBayes(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna)
+predicted <- predict(nb, testna, type="class")
+observed <- testna$KDO_ZMAGA
+
+CA(observed, predicted)
+
+predMat <- predict(nb, testna, type = "raw")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = naiveBayes, predict = mypredict.generic)
+
+# z knjiznico "CORElearn"
+
+cl_nb <- CoreModel(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna, model="bayes")
+predicted <- predict(cl_nb, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl_nb, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna,model = mymodel.coremodel, predict = mypredict.coremodel, target.model="tree")
+
+
+#
+#
+# K-NAJBLIZJIH SOSEDOV
+#
+#
+
+################################################################################
+#     gradnja modela s pomocjo knjiznice "CORElearn" glede na vse podatke      #
+################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.747)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+cl.knn <- CoreModel(KDO_ZMAGA ~ ., data = ucna, model="knn", kInNN = 15)
+observed <- testna$KDO_ZMAGA
+predicted <- predict(cl.knn, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl.knn, testna, type = "probability")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = mymodel.coremodel, predict = mypredict.coremodel, target.model="knn")
+
+
+################################################################################
+#      gradnja modela s pomocjo knjiznice "CORElearn" glede na stevilo zmag    #
+################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.756)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+cl.knn <- CoreModel(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna, model="knn", kInNN = 14)
+observed <- testna$KDO_ZMAGA
+predicted <- predict(cl.knn, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl.knn, testna, type = "probability")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = mymodel.coremodel, predict = mypredict.coremodel, target.model="knn")
+
+
+#######################################################################################
+#     gradnja modela s pomocjo knjiznice "CORElearn" glede na napredno statistiko     #
+#######################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.75)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+cl.knn <- CoreModel(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna, model="knn", kInNN = 5)
+observed <- testna$KDO_ZMAGA
+predicted <- predict(cl.knn, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl.knn, testna, type = "probability")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = mymodel.coremodel, predict = mypredict.coremodel, target.model="knn")
+
+
+
+#
+#
+# NAKLJUCNI GOZD
+#
+#
+
+#####################################################################################
+#       gradnja modela s pomocjo knjiznice "randomForest" glede na vse podatke      #
+#####################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.6)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+rf <- randomForest(KDO_ZMAGA ~ ., data = ucna)
+observed <- testna$KDO_ZMAGA
+predicted <- predict(rf, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(rf, testna, type = "prob")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+mypredict.rf <- function(object, newdata){predict(object, newdata, type = "class")}
+errorest(KDO_ZMAGA~., data=ucna, model = randomForest, predict = mypredict.generic)
+
+# gradnja modela s pomocjo knjiznice "CORElearn"
+
+cl_rf <- CoreModel(KDO_ZMAGA ~ ., data = ucna, model="rf")
+predicted <- predict(cl_rf, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl_rf, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = mymodel.coremodel, predict = mypredict.coremodel, target.model="rf")
+
+##############################################################################################
+#    gradnja modela s pomocjo knjiznice "randomForest" glede na stevilo zmag home / away     #
+##############################################################################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.61)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+rf <- randomForest(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna)
+observed <- testna$KDO_ZMAGA
+predicted <- predict(rf, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(rf, testna, type = "prob")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+mypredict.rf <- function(object, newdata){predict(object, newdata, type = "class")}
+errorest(KDO_ZMAGA~., data=ucna, model = randomForest, predict = mypredict.generic)
+
+# gradnja modela s pomocjo knjiznice "CORElearn"
+
+cl_rf <- CoreModel(KDO_ZMAGA ~ ST_ZMAG_DOMA + ST_ZMAG_AWAY, data = ucna, model="rf")
+predicted <- predict(cl_rf, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl_rf, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = mymodel.coremodel, predict = mypredict.coremodel, target.model="rf")
+
+
+##########################################
+#       glede na napredno statistiko     #
+##########################################
+
+k <- as.integer(nrow(tekme_z_statistiko) * 0.62)
+ucna <- tekme_z_statistiko[1:k,]
+testna <- tekme_z_statistiko[-(1:k),]
+
+vecinski_klasifikator = sum(ucna$KDO_ZMAGA == "H") / nrow(ucna)
+
+rf <- randomForest(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna)
+observed <- testna$KDO_ZMAGA
+predicted <- predict(rf, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(rf, testna, type = "prob")
+obsMat <- model.matrix( ~ KDO_ZMAGA-1, testna)
+
+Brier.score(obsMat, predMat)
+
+mypredict.rf <- function(object, newdata){predict(object, newdata, type = "class")}
+errorest(KDO_ZMAGA~., data=ucna, model = randomForest, predict = mypredict.generic)
+
+# gradnja modela s pomocjo knjiznice "CORElearn"
+
+cl_rf <- CoreModel(KDO_ZMAGA ~ SH_POS + SH_OE + SH_eFG + SH_TO + SH_ORP + SH_FTR + SA_POS + SA_OE + SA_eFG + SA_TO + SA_ORP + SA_FTR, data = ucna, model="rf")
+predicted <- predict(cl_rf, testna, type="class")
+CA(observed, predicted)
+
+predMat <- predict(cl_rf, testna, type = "probability")
+Brier.score(obsMat, predMat)
+
+errorest(KDO_ZMAGA~., data=ucna, model = mymodel.coremodel, predict = mypredict.coremodel, target.model="rf")
+
+########################### KONEC KLASIFIKACIJE
+
+
+##########################################################################################
+# 	MODEL GLEDE NA NAPREDNO STATISTIKO PREJSNJI, brez drevesa z utežmi in brez knjiznice #
+##########################################################################################
+
+ekipe <- as.vector(levels(tekme[1,]$HOME))
+
+#################### Dodal da uzame samo iz ucne mnozice in spremenu
+k <- as.integer(3690*0.75)
+ucna <- tekme[0:k,]
+testna <- tekme[-(0:k),]
+testna[,1:2] = NULL
+testna[,3:15] = NULL
+testna[,5:17] = NULL
+KDO_ZMAGA <- rep(0, length(testna))
+for(i in 1:nrow(testna)){ 
+	if(testna[i,]$HPTS < testna[i,]$APTS){
+		KDO_ZMAGA[i] = as.vector(testna[i,]$AWAY)
+	}
+	if(testna[i,]$HPTS > testna[i,]$APTS){
+		KDO_ZMAGA[i] = as.vector(testna[i,]$HOME)
+
+	}
+}
+testna$HPTS = NULL
+testna$APTS = NULL
+frame_testna <- data.frame(testna, KDO_ZMAGA)
+frame_testna
+ST_ZMAG_DOMA_UCNE = rep(0, length(ekipe)) # st. zmag doma
+ST_ZMAG_GOSTE_UCNE = rep(0, length(ekipe)) # st. zmag away
+FG_MD = rep(0,length(ekipe)) # vsi zadeti meti iz igre
+FG_AT = rep(0,length(ekipe)) #vsi poskusi iz igre
+FT_MD = rep(0,length(ekipe)) #vsi zadeti prosti
+FT_AT = rep(0,length(ekipe)) #poskusi prosti
+OR = rep(0,length(ekipe)) #vsi skoki v napadu
+DR = rep(0,length(ekipe)) #vsi skoki v obrambi
+TO = rep(0,length(ekipe)) #vse izgubljene žoge
+for(i in 1:nrow(ucna)){
+	for(st in 1:length(ekipe)){
+		if(ucna[i,]$HOME == ekipe[st]){
+			FG_AT[st] = FG_AT[st] + ucna[i,]$H2PA + ucna[i,]$H3PA  
+			FG_MD[st] = FG_MD[st] + ucna[i,]$H2PM + ucna[i,]$H3PM  
+			FT_AT[st] = FT_AT[st] + ucna[i,]$HFTA 
+			FT_MD[st] = FT_MD[st] + ucna[i,]$HFTM 	
+			OR[st] = OR[st] + ucna[i,]$HORB	
+			TO[st] = TO[st] + ucna[i,]$HTOV
+			DR[st] = DR[st] + ucna[i,]$HDRB
+			if(ucna[i,]$HPTS > ucna[i,]$APTS){
+				ST_ZMAG_DOMA_UCNE[st] = ST_ZMAG_DOMA_UCNE[st] + 1
+			}
+		}
+
+		if(ucna[i,]$AWAY == ekipe[st]){
+			FG_AT[st] = FG_AT[st] + ucna[i,]$A2PA + ucna[i,]$A3PA  
+			FG_MD[st] = FG_MD[st] + ucna[i,]$A2PM + ucna[i,]$A3PM  
+			FT_AT[st] = FT_AT[st] + ucna[i,]$AFTA 
+			FT_MD[st] = FT_MD[st] + ucna[i,]$AFTM 	
+			OR[st] = OR[st] + ucna[i,]$AORB
+			TO[st] = TO[st] + ucna[i,]$ATOV
+			DR[st] = DR[st] + ucna[i,]$ADRB
+			if(ucna[i,]$HPTS < ucna[i,]$APTS){
+				ST_ZMAG_GOSTE_UCNE[st] = ST_ZMAG_GOSTE_UCNE[st] +1 
+			}
+		}
+		
+	}
+}
+ST_TEKEM_NA_EKIPO <- rep(0, length(ekipe))
+ST_TEKEM_HOME_UCNE <- rep(0, length(ekipe))
+ST_TEKEM_AWAY_UCNE <- rep(0, length(ekipe))
+for(i in 1:length(ekipe)){
+	ST_TEKEM_HOME_UCNE[i] = sum(ucna$HOME == ekipe[i])
+	ST_TEKEM_AWAY_UCNE[i] = sum(ucna$AWAY == ekipe[i])
+}
+ST_TEKEM_NA_EKIPO = ST_TEKEM_HOME_UCNE + ST_TEKEM_AWAY_UCNE
+FG_PCT <- rep(0,length(ekipe)) #odstotek meta iz igre
+FT_PCT <- rep(0,length(ekipe)) #odstotek prosti meti
+DELEZ_ZMAGH_UCNA = ST_ZMAG_DOMA_UCNE / ST_TEKEM_HOME_UCNE
+POVPRECJE_OR = OR / ST_TEKEM_NA_EKIPO
+POVPRECJE_DR = DR / ST_TEKEM_NA_EKIPO
+POVPRECJE_TO = TO / ST_TEKEM_NA_EKIPO
+
+for(i in 1:length(ekipe)){
+	FG_PCT[i] = FG_MD[i]/FG_AT[i] 
+	FT_PCT[i] = FT_MD[i]/FT_AT[i]
+}
+
+Frame_statistika_ekip <- data.frame(ekipe,FG_PCT,FT_PCT,POVPRECJE_OR,POVPRECJE_DR,POVPRECJE_TO,DELEZ_ZMAGH_UCNA)
+Frame_statistika_ekip
+
+# testiraj
+meja <- 21.5
+predicted <- rep(0,length(testna))
+for(i in 1:nrow(testna)){
+	vrednost_da_zmaga_HOME = 0
+	ekipa_HOME <- Frame_statistika_ekip[ekipe == testna[i,]$HOME,]
+	ekipa_HOME$ekipe = NULL
+	ekipa_AWAY <- Frame_statistika_ekip[ekipe == testna[i,]$AWAY,]
+	ekipa_AWAY$ekipe = NULL
+	# utez ce igrajo doma  0.4
+	vrednost_da_zmaga_HOME = ekipa_HOME$DELEZ_ZMAGH_UCNA * 100 * 0.4
+	# utez na vse izgubljene zoge 0.1
+	if(ekipa_HOME$POVPRECJE_TO < ekipa_AWAY$POVPRECJE_TO){
+		vrednost_da_zmaga_HOME = vrednost_da_zmaga_HOME + ekipa_HOME$POVPRECJE_TO * 0.1
+	}
+	# utez na vse skoke v obrambi 0.1
+	if(ekipa_HOME$POVPRECJE_DR > ekipa_AWAY$POVPRECJE_DR){
+		vrednost_da_zmaga_HOME = vrednost_da_zmaga_HOME + ekipa_HOME$POVPRECJE_DR * 0.1
+	}
+	# utez na vse skoke v napadu 0.1
+	if(ekipa_HOME$POVPRECJE_OR > ekipa_AWAY$POVPRECJE_OR){
+		vrednost_da_zmaga_HOME = vrednost_da_zmaga_HOME + ekipa_HOME$POVPRECJE_OR * 0.1
+	}
+	# utez na delez zadetih prostih metov 0.1
+	if(ekipa_HOME$FT_PCT > ekipa_AWAY$FT_PCT){
+		vrednost_da_zmaga_HOME = vrednost_da_zmaga_HOME + ekipa_HOME$FT_PCT * 0.1
+	}
+	# utez na delez zadetih dvojk in trojk 0.2
+	if(ekipa_HOME$FG_PCT > ekipa_AWAY$FG_PCT){
+		vrednost_da_zmaga_HOME = vrednost_da_zmaga_HOME + ekipa_HOME$FG_PCT * 0.2
+	}
+	if(vrednost_da_zmaga_HOME > meja){
+		predicted[i] <- as.vector(testna[i,]$HOME)
+	} else {
+		predicted[i] <- as.vector(testna[i,]$AWAY)
+	}
+}
+observed <- as.vector(frame_testna$KDO_ZMAGA)
+table(observed, predicted)
+
+
+########################################################################### konec spremembe
+
+#################################################
+#		REGRESIJA					#
+#################################################
+
+
+##################################################
+# FUNKCIJE REGRESIJA
+
+mae <- function(observed, predicted)
+{
+	mean(abs(observed - predicted))
+}
+
+rmae <- function(observed, predicted, mean.val) 
+{  
+	sum(abs(observed - predicted)) / sum(abs(observed - mean.val))
+}
+
+mse <- function(observed, predicted)
+{
+	mean((observed - predicted)^2)
+}
+
+rmse <- function(observed, predicted, mean.val) 
+{  
+	sum((observed - predicted)^2)/sum((observed - mean.val)^2)
+}
+
+
+
+#########################################################
+# LINEARNA REGRESIJA
+
+regresija_lm <- lm(RAZLIKA ~ ., regresija_ucna)
+lm_napovedano <-predict(regresija_lm, regresija_testna )
+mae(regresija_testna$RAZLIKA,lm_napovedano)
+rmae(regresija_testna$RAZLIKA, lm_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,lm_napovedano)
+rmse(regresija_testna$RAZLIKA, lm_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_lm <- lm(RAZLIKA ~ A_OE, regresija_ucna)
+lm_napovedano <-predict(regresija_lm, regresija_testna )
+mae(regresija_testna$RAZLIKA,lm_napovedano)
+rmae(regresija_testna$RAZLIKA, lm_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,lm_napovedano)
+rmse(regresija_testna$RAZLIKA, lm_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_lm <- lm(RAZLIKA ~ H_AVGFG + H_AST + A_TOV + A_DRB, regresija_ucna)
+lm_napovedano <-predict(regresija_lm, regresija_testna )
+mae(regresija_testna$RAZLIKA,lm_napovedano)
+rmae(regresija_testna$RAZLIKA, lm_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,lm_napovedano)
+rmse(regresija_testna$RAZLIKA, lm_napovedano, mean(regresija_ucna$RAZLIKA))
+
+#############################################################
+# REGRESIJSKO DREVO
+
+regresija_rd <- rpart(RAZLIKA ~ , regresija_ucna)
+rd_napovedano <-predict(regresija_rd, regresija_testna)
+mae(regresija_testna$RAZLIKA,rd_napovedano)
+rmae(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rd_napovedano)
+rmse(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+plot(regresija_rd);text(regresija_rd, pretty = 0)
+
+#Drevo z dodatnimi nastavitvami
+rpart.control()
+
+regresija_rd <- rpart(RAZLIKA ~ ., regresija_ucna, minsplit = 100)
+rd_napovedano <-predict(regresija_rd, regresija_testna)
+mae(regresija_testna$RAZLIKA,rd_napovedano)
+rmae(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rd_napovedano)
+rmse(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+plot(regresija_rd);text(regresija_rd, pretty = 0)
+
+regresija_rd <- rpart(RAZLIKA ~ H_OE, regresija_ucna, minsplit = 100)
+rd_napovedano <-predict(regresija_rd, regresija_testna)
+mae(regresija_testna$RAZLIKA,rd_napovedano)
+rmae(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rd_napovedano)
+rmse(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+plot(regresija_rd);text(regresija_rd, pretty = 0)
+
+regresija_rd <- rpart(RAZLIKA ~ H_AVGFG + H_AST + A_TOV + A_DRB, regresija_ucna, minsplit = 100)
+rd_napovedano <-predict(regresija_rd, regresija_testna)
+mae(regresija_testna$RAZLIKA,rd_napovedano)
+rmae(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rd_napovedano)
+rmse(regresija_testna$RAZLIKA, rd_napovedano, mean(regresija_ucna$RAZLIKA))
+plot(regresija_rd);text(regresija_rd, pretty = 0)
+###########################################################
+# RANDOM FOREST
+
+regresija_rf <- randomForest(RAZLIKA ~ ., regresija_ucna)
+rf_napovedano <- predict(regresija_rf, regresija_testna)
+mae(regresija_testna$RAZLIKA,rf_napovedano)
+rmae(regresija_testna$RAZLIKA, rf_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rf_napovedano)
+rmse(regresija_testna$RAZLIKA, rf_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_rf <- randomForest(RAZLIKA ~ H_OE, regresija_ucna)
+rf_napovedano <- predict(regresija_rf, regresija_testna)
+mae(regresija_testna$RAZLIKA,rf_napovedano)
+rmae(regresija_testna$RAZLIKA, rf_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rf_napovedano)
+rmse(regresija_testna$RAZLIKA, rf_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_rf <- randomForest(RAZLIKA ~ H_AVGFG + H_AST + A_TOV + A_DRB, regresija_ucna)
+rf_napovedano <- predict(regresija_rf, regresija_testna)
+mae(regresija_testna$RAZLIKA,rf_napovedano)
+rmae(regresija_testna$RAZLIKA, rf_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,rf_napovedano)
+rmse(regresija_testna$RAZLIKA, rf_napovedano, mean(regresija_ucna$RAZLIKA))
+
+############################################################
+# SVM
+
+regresija_svm <- svm(RAZLIKA ~ ., regresija_ucna)
+svm_napovedano <- predict(regresija_svm, regresija_testna)
+mae(regresija_testna$RAZLIKA,svm_napovedano)
+rmae(regresija_testna$RAZLIKA, svm_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,svm_napovedano)
+rmse(regresija_testna$RAZLIKA, svm_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_svm <- svm(RAZLIKA ~ H_OE, regresija_ucna)
+svm_napovedano <- predict(regresija_svm, regresija_testna)
+mae(regresija_testna$RAZLIKA,svm_napovedano)
+rmae(regresija_testna$RAZLIKA, svm_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,svm_napovedano)
+rmse(regresija_testna$RAZLIKA, svm_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_svm <- svm(RAZLIKA ~ H_AVGFG + H_AST + A_TOV + A_DRB, regresija_ucna)
+svm_napovedano <- predict(regresija_svm, regresija_testna)
+mae(regresija_testna$RAZLIKA,svm_napovedano)
+rmae(regresija_testna$RAZLIKA, svm_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,svm_napovedano)
+rmse(regresija_testna$RAZLIKA, svm_napovedano, mean(regresija_ucna$RAZLIKA))
+
+############################################################
+# CORE LEARN
+
+regresija_core <- CoreModel(RAZLIKA ~ ., data=regresija_ucna, model="regTree", modelTypeReg=1)
+core_napovedano <- predict(regresija_core, regresija_testna)
+mae(regresija_testna$RAZLIKA,core_napovedano)
+rmae(regresija_testna$RAZLIKA, core_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,core_napovedano)
+rmse(regresija_testna$RAZLIKA, core_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_core <- CoreModel(RAZLIKA ~ H_OE, data=regresija_ucna, model="regTree", modelTypeReg=1)
+core_napovedano <- predict(regresija_core, regresija_testna)
+mae(regresija_testna$RAZLIKA,core_napovedano)
+rmae(regresija_testna$RAZLIKA, core_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,core_napovedano)
+rmse(regresija_testna$RAZLIKA, core_napovedano, mean(regresija_ucna$RAZLIKA))
+
+regresija_core <- CoreModel(RAZLIKA ~ H_AVGFG + H_AST + A_TOV + A_DRB, data=regresija_ucna, model="regTree", modelTypeReg=1)
+core_napovedano <- predict(regresija_core, regresija_testna)
+mae(regresija_testna$RAZLIKA,core_napovedano)
+rmae(regresija_testna$RAZLIKA, core_napovedano, mean(regresija_ucna$RAZLIKA))
+mse(regresija_testna$RAZLIKA,core_napovedano)
+rmse(regresija_testna$RAZLIKA, core_napovedano, mean(regresija_ucna$RAZLIKA))
+

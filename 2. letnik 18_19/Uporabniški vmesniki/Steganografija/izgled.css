@@ -1,0 +1,29 @@
+
+
+.active a{
+    background-color: #4339ff !important;
+}
+
+.navbar-custom {
+    text-decoration-color: black;
+    background-color: rgba(105, 169, 253, 0.336);
+}
+
+.sub-row-wrapper { 
+    text-align: left; 
+    width: auto; 
+    height: auto;
+    position:relative; 
+} 
+
+.sub-row-left-col { 
+    display:inline-block; 
+    width: 50%;
+    text-align: left; 
+}
+
+.sub-row-right-col { 
+    display:inline-block; 
+    text-align: right;
+    width: 49%;  
+}

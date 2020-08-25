@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Grafika naloga 1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="razredi.js"></script>
+    <h1 align="center">Naloga RG 1</h1>
+</head>
+<body>
+<div align="center">
+<div style="background-color:lightgrey; width:50%;" >
+    <h2>Point manager</h2>
+    <label>Navodila za vpis:</label><br>
+    <label>-v x1 y1 z1</label><br>
+    <textarea id="textAreaVpis"  rows="3" cols="15"></textarea>
+    <br>
+    <button type="button" onclick="dodajPM()">Preberi</button><br><br>
+    <label>Izpis vektorjev:</label><br>
+    <textarea readonly id="textAreaIzpis"  rows="3" cols="15"></textarea>
+    <br>
+    <button type="button" onclick="izhod()">Izpis</button><br><br>
+    <h2>Transformation:</h2>
+    <h3>Demonstracija:</h3>
+
+    <b>Navodila za demonstracijo:</b><br>
+     <label>-Ime_metode točka vrednost</label><br>
+     <label>-Metode: Translacija, Rotacija, Skalacija</label><br>    
+     <label>-Točke: x,y,z</label><br><br>
+    <label>Vnos: </label><br><textarea style="resize:none" id="demonstracija"  rows="1" cols=""></textarea><br><br>
+    <label>Izhod:</label><br><textarea readonly style="resize:none" id="demoIzpis"  rows="4" cols="40"></textarea>
+    <br>
+    <button type="buttonDemonstracija" onclick="Demo()">Prikaži delovanje</button> 
+    <button type="buttonPonastavi" onclick="ponastavi()">Ponastavi</button>
+    <br>
+</div>
+</div>
+</body>
+</html>

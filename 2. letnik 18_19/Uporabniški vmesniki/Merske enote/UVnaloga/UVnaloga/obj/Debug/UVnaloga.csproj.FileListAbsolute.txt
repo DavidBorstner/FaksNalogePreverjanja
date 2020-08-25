@@ -1,0 +1,16 @@
+C:\Users\User\source\repos\UVnaloga\UVnaloga\bin\Debug\UVnaloga.exe.config
+C:\Users\User\source\repos\UVnaloga\UVnaloga\bin\Debug\UVnaloga.exe
+C:\Users\User\source\repos\UVnaloga\UVnaloga\bin\Debug\UVnaloga.pdb
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.csprojAssemblyReference.cache
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.Form1.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.Properties.Resources.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.csproj.GenerateResource.cache
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.csproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.exe
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.pdb
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.dolzina.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.ExitPopup.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.povrsina.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.Prostornina.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.temperatura.resources
+C:\Users\User\source\repos\UVnaloga\UVnaloga\obj\Debug\UVnaloga.info.resources

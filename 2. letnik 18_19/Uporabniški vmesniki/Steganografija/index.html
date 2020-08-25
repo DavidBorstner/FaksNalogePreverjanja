@@ -1,0 +1,173 @@
+<html>
+
+<head>
+  <title>Steganografija UV</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1 style="text-align: center; font-size: 50px">Steganografija UV</h1>
+    </div>
+
+    <ul class="nav nav-pills nav-justified navbar-custom navbar-dark" id="tabs" data-tabs="tabs">
+    </ul>
+
+    <div id="my-tab-content" class="tab-content">
+      <div class="tab-pane" id="encode">
+        <div>
+
+          <form class="form">
+            <div class="form-group">
+              <h3>Slika:</h3>
+              <input id="fileDodaj" class="form-control custom-file" type="file" name="baseFile"
+                style="height: 75px; background-color:aliceblue; " onchange="previewEncodeImage()">
+            </div>
+
+            <div class="form-group">
+              <h3>Besedilo:</h3>
+              <textarea id="nekaj" class="form-control message" rows="3" placeholder="Vnesite poljuben tekst"
+                style="resize:none; background-color: aliceblue;"></textarea>
+            </div>
+
+            <div class="form-group">
+              <button class="encode btn btn-default" style="margin-right: 5px;"
+                onclick="encodeMessage()">Zakodiraj</button>
+            </div>
+          </form>
+          <div class="clearfix"></div>
+        </div>
+
+        <div class="error" style="display: none;"></div>
+        <div id="podSlika" class="slikaPod" style="display: none;">
+          <h3>Podatki o sliki:</h3>
+          <textarea id="podatkiSlika" class="form-control message"
+            style="word-wrap:break-word;resize: none; height: 75px; background-color: aliceblue;">
+            </textarea>
+        </div>
+        <div class="binary" style="display: none;">
+          <textarea class="form-control message" style="word-wrap:break-word;resize: none;">
+          </textarea>
+        </div>
+        <div class="images sub-row-wrapper" style="display: none;">
+          <hr />
+          <div class="sub-row-left-col" style="display: none;">
+            <h3>Original</h3>
+            <canvas class="rounded float-left"></canvas>
+          </div>
+          <div class="sub-row-right-col" style="display: none;">
+            <h3>Slika z zakodirano vsebino</h3>
+            <a onclick="download_image()">
+              <canvas id="zakCanvas" download="novaDatoteka.png" style="cursor: pointer;" onclick=""
+                class="rounded float-right"></canvas>
+            </a>
+          </div>
+
+          
+
+          <div class="nulled" style="display: none;">
+            <canvas></canvas>
+          </div>
+
+        </div>
+      </div>
+
+      <!--OD TLE NAPREJ DELI-->
+      <div class="tab-pane active" id="test">
+        <div>
+          <form class="form">
+            <div class="form-group">
+              <h3>Vnesite sliko:</h3>
+
+              
+              <input id="uploadSlika"  class="form-control" visibility="hidden"
+                style="height: 37px; background-color:aliceblue;" type="file" name="vnosSlike" data-buttonText="Besedil"
+                onchange="preview()">
+            </div>
+          </form>
+
+
+
+          <div class="original sub-row-left-col">
+            <h3>Nezakodirana slika:</h3>
+            <canvas class="float-left" id="testOriginal"
+              style="background-color:aliceblue;width: 80%; height: 70%; border: 1px solid rgb(207, 202, 202);"
+              aria-placeholder="Nekaj"></canvas>
+          </div>
+
+          <div class="message sub-row-right-col">
+            <h3>Slika z zakodirano vsebino: </h3>
+            <a onclick="download_image()">
+              <canvas id="testZakodirano" download="novaDatoteka.png"
+                style="cursor: pointer; background-color:aliceblue;border: 1px solid rgb(207, 202, 202); width: 80%; height: 70%;"
+                onclick="" class="rounded float-right"></canvas>
+            </a>
+          </div>
+
+          <div style="margin-left: auto; margin-right: auto; text-align: center;">
+            <button class="btn" data-toggle="modal" data-target="#myModal" id="gumbInfo" type="button"
+              style="font-size:40px;width: 100px;height: 75px;display: block; position: absolute; top: 56%;left: 50%; transform: translateY(-50%) translateX(-50%);color:white;"><i
+                class="glyphicon 	glyphicon glyphicon-question-sign"></i></button>
+            <button class="btn" id="gumbSmer" onclick="smer()" type="button"
+              style="font-size:40px;width: 100px;height: 75px;display: block; position: absolute; top:83%;left: 50%; transform: translateY(-50%) translateX(-50%);color:white;"><i
+                class="glyphicon glyphicon-arrow-right"></i></button>
+          </div>
+
+        </div>
+
+        <div class="nulled" style="display: none;">
+          <canvas></canvas>
+        </div>
+
+        <div class="form-group vnosTest" style="display: none;">
+          <h3>Besedilo:</h3>
+          <textarea id="vnos" class="form-control message" rows="3" onkeypress="onKeyDown()"
+            placeholder="Vnesite poljuben tekst" style="resize:none; background-color: aliceblue;"></textarea>
+        </div>
+        <button type="button" id="gumbIzvedi" style="display: none;" onclick="izvedi()">
+        </button>
+
+        <div id="myModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title">Navodila za uporabo</h2>
+              </div>
+              <div class="modal-body">
+                <h3>Kodiranje sporočila(puščica v desno):</h3>
+                <h4>1. Izberite željeno sliko</h3>
+                <h4>2. Vnesite tekst, ki ga želite zakodirati v sliko ter pritisnite enter</h4>
+                <h4>3. Na desni strani se vam pojavi slika z zakodirano vsebino</h4>
+                <h4>4. Za prenos slike kliknite na desno sliko</h4>
+                </br>
+                <h3>Branje zakodiranega sporočila(puščica v levo):</h3>
+                <h4>1. Izberite željeno sliko</h4>
+                <h4>2. Spodaj pod slikama se vam bo prikazalo skrito sporočilo</h4>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+
+
+  <hr />
+  </div>
+  <link rel="stylesheet" href="izgled.css">
+  <link rel="styleshee" href="drop.css">
+  <script src="dropzone.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <script type="text/JavaScript" src="script.js"></script>
+</body>
+
+</html>

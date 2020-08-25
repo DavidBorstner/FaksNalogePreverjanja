@@ -1,0 +1,102 @@
+﻿1.Napišite zaporedje ukazov v zbirniku za procesor ARM, ki zamenja vrednosti 32-bitnih spremenljivk STEV1 in STEV2. 
+Nalogo rešite s posrednim naslavljanjem preko registra R0.
+
+		  ADR r0, STEV1
+          LDR r1,[r0]
+          ADR r0, STEV2
+          LDR r2,[r0]
+          
+          STR r1,[r0]
+          
+          ADR r0,STEV1
+          STR R2,[r0]
+
+2.Rezervirajte prostor za tabelo z oznako TABELA, v kateri je 5 8-bitnih vrednosti. 
+Nato napišite zaporedje ukazov v zbirniku za ARM, ki v vse bajte tabele zapiše vrednost 0xFF. 
+Nalogo rešite s posrednim naslavljanjem preko registra R0 in uporabo takojšnjega odmika. 
+Uporabite le ukaze za nalaganje konstant v registre in ukaze za shranjevanje vrednosti registrov v pomnilnik.
+
+               .text
+TABELA:    .space 5
+
+          .align
+          .global __start
+__start:
+@ ukazi
+          ADR r0,TABELA
+          MOV r1,#0xFF
+          STRB r1,[r0]
+          STRB r1,[r0,#1] 
+          STRB r1,[r0,#2]  
+          STRB r1,[r0,#3]  
+          STRB r1,[r0,#4]               
+__end:    b __end 
+
+3.Rezervirajte prostor za tabelo z oznako TABELA, v kateri je 6 8-bitnih vrednosti. 
+Nato napišite zaporedje ukazov v zbirniku za ARM, ki najprej v zaporedne bajte tabele zapiše števila od 1 do 6, 
+nato pa zamenja vrstni red elementov tabele tako, da so po zamenjavi vrstnega reda števila razporejena v obratnem vrstnem redu kot na začetku. 
+Nalogo rešite s posrednim naslavljanjem s takojšnjim odmikom preko registra R0.
+
+               .text
+TABELA:    .space 6
+
+          .align
+          .global __start
+__start:
+@ ukazi
+          ADR r0,TABELA
+          MOV r1,#1
+          STRB r1,[r0]
+          MOV r1,#2
+          STRB r1,[r0,#1]
+          MOV r1,#3
+          STRB r1,[r0,#2]
+          MOV r1,#4
+          STRB r1,[r0,#3]
+          MOV r1,#5
+          STRB r1,[r0,#4]
+           MOV r1,#6
+          STRB r1,[r0,#5]
+          
+          
+          LDRB R1,[r0]      @menjava 1.ga in 6ga
+          LDRB R2,[r1,#5]
+          STRB r1[r0,#5]
+          STRB r2,[r0]
+          
+          LDRB R1,[r0,#1]
+          LDRB R2,[r1,#4]
+          STRB r1[r0,#4]
+          STRB r2,[r0,#1]
+          
+          LDRB R1,[r0,#2]
+          LDRB R2,[r1,#3]
+          STRB r1[r0,#3]
+          STRB r2,[r0,#2]
+          
+                        
+__end:    b __end 
+
+4.Napišite zaporedje ukazov v zbirniku za procesor ARM, ki 32-bitno spremenljivko STEV1, 
+ki je v pomnilniku shranjena po pravilu tankega konca, prepiše v STEV2, pri čemer naj bo STEV2 v pomnilniku shranjena po pravilu debelega konca. 
+Uporabite posredno naslavljanje s takojšnjim odmikom preko registrov R0 in R1.
+
+	STEV1:    .WORD  0x01020304
+	STEV2:    .SPACE 4
+
+	  adr    r0, STEV1
+          mov    r1, #1
+         
+         
+          ldrb  r1, [r0, #0]
+          strb  r1, [r0, #7]
+          
+          ldrb  r1, [r0, #1] 
+          strb  r1, [r0, #6]
+             
+          ldrb  r1, [r0, #2]
+          strb  r1, [r0, #5]
+          
+          ldrb  r1, [r0, #3]
+          strb  r1, [r0, #4]
+

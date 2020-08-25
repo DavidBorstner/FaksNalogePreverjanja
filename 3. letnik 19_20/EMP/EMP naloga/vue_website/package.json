@@ -1,0 +1,41 @@
+{
+  "name": "varuska",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.0.0-rc.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/vue-fontawesome": "^0.1.6",
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.0-rc.22",
+    "firebase": "^7.6.0",
+    "vue": "^2.6.10",
+    "vue-content-loader": "^0.2.1",
+    "vue-firestore": "^0.3.22",
+    "vue-router": "^3.0.1",
+    "vue-template-loader": "^1.0.0",
+    "vuefire": "^2.2.0",
+    "vuex": "^3.0.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.5.0",
+    "@vue/cli-service": "^3.8.0",
+    "vue-cli-plugin-vuetify": "^0.5.0",
+    "vue-template-compiler": "^2.6.10"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 10"
+  ]
+}

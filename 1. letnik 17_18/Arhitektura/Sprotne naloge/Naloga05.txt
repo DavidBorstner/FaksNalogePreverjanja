@@ -1,0 +1,186 @@
+1. Napišite zaporedje ukazov v zbirniku za procesor ARM, ki sešteje 32-bitni spremenljivki STEV1 in STEV2
+,rezultat pa zapiše v 32-bitno spremenljivko REZ.
+Nalogo ponovite še za primer, ko spremenljivko STEV2 odštejemo od spremenljivke STEV1.
+Naredite tudi razlièice za seštevanje in odštevanje 16-bitnih in 8-bitnih spremenljivk.
+STEV1 in STEV2 naj imata zaèetni vrednosti 10(10) in 5(10) zaporedoma, za REZ pa samo rezervirajte
+prostor.
+a) Seštevanje
+
+          .text
+          
+
+STEV1: .word 10
+STEV2: .word 5
+rez:   .space 4 @rezerviram 4B
+
+          .align
+          .global __start
+__start:
+
+    ADR R0,STEV1   @naslov
+    LDR R1,[R0]    @vrednost
+    
+    ADR R0,STEV2
+    LDR R2,[R0]
+    
+    ADR R0,rez
+    
+    ADD R3,R1,R2
+    STR R3,[R0]
+                
+
+__end:    b __end  
+
+b) Odštevanje
+          .text
+          
+
+STEV1: .word 10
+STEV2: .word 5
+rez:   .space 4 @rezerviram 4B
+
+          .align
+          .global __start
+__start:
+
+    ADR R0,STEV1   @naslov
+    LDR R1,[R0]    @vrednost
+    
+    ADR R0,STEV2
+    LDR R2,[R0]
+    
+    ADR R0,rez
+    
+    sub R3,R1,R2
+    STR R3,[R0]
+                
+
+__end:    b __end
+
+c)16bitna verzija:
+          .text
+          
+
+STEV1: .hword 10
+STEV2: .hword 5
+rez:   .space 2
+
+          .align
+          .global __start
+__start:
+
+    ADR R0,STEV1   @naslov
+    LDRH R1,[R0]    @vrednost
+    
+    ADR R0,STEV2
+    LDRH R2,[R0]
+    
+    ADR R0,rez
+    
+    sub R3,R1,R2
+    STRH R3,[R0]
+                
+
+__end:    b __end  
+
+d)8 bitno:
+          .text
+          
+
+STEV1: .byte 10
+STEV2: .byte 5
+rez:   .space 1
+
+          .align
+          .global __start
+__start:
+
+    ADR R0,STEV1   @naslov
+    LDRB R1,[R0]    @vrednost
+    
+    ADR R0,STEV2
+    LDRB R2,[R0]
+    
+    ADR R0,rez
+    
+    sub R3,R1,R2
+    STRB R3,[R0]
+                
+
+__end:    b __end   
+
+
+2. Napišite zaporedje ukazov v zbirniku za procesor ARM, ki izraèuna izraz STEV1=STEV2+STEV3–STEV1,
+pri èemer so STEV1, STEV2 in STEV3 32-bitne spremenljivke
+z zaèetnimi vrednostmi (doloèite jih s psevdoukazi): STEV1 = 50(16), STEV2 = 100(10), STEV3 = 2F(16).
+
+          .text
+          
+
+STEV1: .word 0x50
+STEV2: .word 100
+STEV3: .word 0x2f
+
+          .align
+          .global __start
+__start:
+
+    ADR R0,STEV1   @naslov
+    LDR R1,[R0]    @vrednost
+    
+    ADR R0,STEV2
+    LDR R2,[R0]
+    
+    ADR R0,STEV3
+    LDR R3,[R0]
+    
+    add r4,r2,r3
+    sub r1,r4,r1
+    
+
+                
+
+__end:    b __end
+
+
+
+3. Zapišite ukaz(e) v zbirniku za procesor ARM, ki v register naloži vrednost spremenljivke:
+a) Nepredznaèeno naloži 32-bitno vrednost 0x12345678 v register R1.
+b) Nepredznaèeno naloži 8-bitno vrednost 128 v register R2.
+c) Predznaèeno naloži 8-bitno vrednost 128 v register R3.
+d) Nepredznaèeno naloži 16-bitno vrednost 0xF123 v register R4.
+e) Predznaèeno naloži 16-bitno vrednost 0xF123 v register R5.
+
+          .text
+          
+
+STEV1: .word 0x12345678
+STEV2: .byte 128
+          .align
+STEV3: .hword 0xf123
+
+          .align
+          .global __start
+__start:
+
+    ADR R0,STEV1   @naslov
+    LDR R1,[R0]    @vrednost
+    
+    ADR R0,STEV2
+    LDRB R2,[R0]
+    LDRSB R3,[R0]
+    
+    ADR R0,STEV3
+    LDRH R4,[R0]
+    LDSH R5,[R0]
+    
+
+    
+
+                
+
+__end:    b __end 
+
+
+
+Vse primere rešite s posrednim naslavljanjem preko registra R0.

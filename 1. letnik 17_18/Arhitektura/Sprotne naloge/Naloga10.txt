@@ -1,0 +1,122 @@
+1.)
+
+          .text
+TABELA:   .space 8
+          .align
+          .global __start
+__start:
+
+adr r0, TABELA
+mov r1, #0
+mov r2, #0xFF
+
+ZANKA:
+  strb r2, [r0, r1]
+  add r1, r1, #1
+  cmp r1, #8
+  blt ZANKA  
+
+__end:    b __end   
+
+2.)
+          .text
+TABELA:   .byte 1,100,255,24,88,31,56,192,155,224
+          .align
+REZULTAT: .hword
+          .global __start
+__start:
+
+adr r0, TABELA
+mov r1, #0
+mov r2, #0
+
+ZANKA:
+  ldrb r3, [r0, r1]
+  add r2, r2, r3 
+  add r1, r1, #1
+  cmp r1, #10
+  blt ZANKA  
+
+adr r4, REZULTAT
+strh r2, [r4]
+__end:    b __end
+
+
+b)
+          .text
+TABELA:   .hword 1,100,255,24,88,31,56,192,155,224
+          .align
+REZULTAT: .word 0
+          .global __start
+__start:
+
+adr r0, TABELA
+mov r1, #0
+mov r2, #0
+mov r4, #0
+
+ZANKA:
+  ldrh r3, [r0, r1]
+  add r2, r2, r3 
+  add r1, r1, #2
+  add r4, r4, #1
+  cmp r1, #10
+  blt ZANKA  
+
+adr r4, REZULTAT
+str r2, [r4]
+__end:    b __end     
+
+3.)
+
+          .text
+TABELA:   .byte 1,100,255,24,88,31,56,192,155,224
+          .align
+REZULTAT: .word 0
+          .global __start
+__start:
+
+adr r0, TABELA
+mov r1, #0
+mov r2, #0
+
+ZANKA:
+  ldrb r3, [r0, r2]
+  cmp r3, #100 
+  addgt r1, r1, r3
+  add r2, r2, #1
+  cmp r2, #10
+  blt ZANKA
+  
+__end:    b __end   
+
+4.)
+          .text
+TABELA:   .hword 1,100,-255,24,-88,31,56,192,155,-224,0,101,-199,47
+          .align
+          .global __start
+__start:
+
+adr r0, TABELA
+mov r1, #0
+mov r2, #0 @odmik
+mov r3, #0 @indeks i
+
+ZANKA:
+  ldrsh r4, [r0, r2]
+  cmp r4, #-100
+  bge DRUGI_POGOJ  
+  add r3, r3, #1 
+  add r2, r2, #2
+  cmp r3, #14
+  blt ZANKA
+  b __end
+  
+DRUGI_POGOJ:
+  cmp r4, #100
+  strlth r1, [r0, r2]
+  add r3, r3, #1 
+  add r2, r2, #2
+  b ZANKA
+
+__end:    b __end   
